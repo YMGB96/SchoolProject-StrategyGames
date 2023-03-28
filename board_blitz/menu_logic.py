@@ -27,9 +27,30 @@ def register(username: str, password: str, repeated_password: str) -> Union[str,
     # return user id if it succeeded
     return user_id
 
+def login(username: str, password: str) -> Union[str, int]:
+    if not username or not password: return Error.UNSET
+    # get user with matching username
+    users: list[dict] = database.get_users()
+    try:
+        user = next(filter( # https://stackoverflow.com/questions/8534256/find-first-element-in-a-sequence-that-matches-a-predicate
+            lambda user:
+                user["name"] == username,
+            users))
+    except: return Error.NOT_EXIST
+    # compare passwords
+    salt = bytes.fromhex(user["salt"])
+    hashed = sha256(salt + password.encode())
+    hashed_password: str = hashed.hexdigest()
+    if user["password"] != hashed_password:
+        return Error.WRONG
+    # return user id if login was successful
+    return user["user_id"]
+
 class Error:
     UNSET = "Benutzername oder Passwort können nicht leer gelassen werden"
     UNMATCH = "Das Passwort gleicht dem wiederholten Passwort nicht"
     SAVE = "Es konnte nicht gespeichert werden"
     EXISTS = "Der Name ist bereits vergeben"
+    NOT_EXIST = "Dieser Nutzer existiert nicht"
+    WRONG = "Falsches Passwort"
     UNKNOWN = "Etwas ist schief gegangen"
