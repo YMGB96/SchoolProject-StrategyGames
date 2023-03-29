@@ -4,6 +4,7 @@ class game_gui:
     def __init__(self) -> None:
         pass
 
+test = pygame.image.load('./board_blitz/resources/testPiece.png')
     
 def drawBoard():
     renderStartX = 100
@@ -31,12 +32,21 @@ def drawBoard():
 pygame.init()
 window = pygame.display.set_mode((640,480))
 
+background = pygame.Surface(window.get_size())
+background = background.convert()
+background.fill((150,150,150))
+window.blit(background, (0,0))
+
+
+drawBoard()
+window.blit(test, (100,70))
+window.blit(test, (220,70))
+
 while True:
     event = pygame.event.poll()
     if event.type == pygame.QUIT:
         break
 
-    drawBoard()
     pygame.display.update()      
 
 pygame.quit()
