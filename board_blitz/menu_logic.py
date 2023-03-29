@@ -1,10 +1,20 @@
 from hashlib import sha256 # https://docs.python.org/3/library/hashlib.html
 from os import urandom
-from typing import Union
 import database
 
-# function that registers a new user
-def register(username: str, password: str, repeated_password: str) -> Union[str, int]:
+class Error:
+    UNSET = "Benutzername oder Passwort können nicht leer gelassen werden"
+    UNMATCH = "Das Passwort gleicht dem wiederholten Passwort nicht"
+    SAVE = "Es konnte nicht gespeichert werden"
+    EXISTS = "Der Name ist bereits vergeben"
+    NOT_EXIST = "Dieser Nutzer existiert nicht"
+    WRONG = "Falsches Passwort"
+    UNKNOWN = "Etwas ist schief gegangen"
+
+active_user: int = 0
+
+def register(username: str, password: str, repeated_password: str) -> str:
+    """Register a new user - returns str on error and None on súccess"""
     if not username or not password: return Error.UNSET
     if password != repeated_password: return Error.UNMATCH
     # generate a salt, to offset the password randomly
@@ -24,10 +34,12 @@ def register(username: str, password: str, repeated_password: str) -> Union[str,
     # save registration to database, return error if it fails
     if not database.add_login(user_id, username, hashed_password, salt.hex()):
         return Error.SAVE
-    # return user id if it succeeded
-    return user_id
+    # set active user id and return no error
+    active_user = user_id
+    return None
 
-def login(username: str, password: str) -> Union[str, int]:
+def login(username: str, password: str) -> str:
+    """Log in with username and password - returns str on error and None on success"""
     if not username or not password: return Error.UNSET
     # get user with matching username
     users: list[dict] = database.get_users()
@@ -44,13 +56,5 @@ def login(username: str, password: str) -> Union[str, int]:
     if user["password"] != hashed_password:
         return Error.WRONG
     # return user id if login was successful
-    return user["user_id"]
-
-class Error:
-    UNSET = "Benutzername oder Passwort können nicht leer gelassen werden"
-    UNMATCH = "Das Passwort gleicht dem wiederholten Passwort nicht"
-    SAVE = "Es konnte nicht gespeichert werden"
-    EXISTS = "Der Name ist bereits vergeben"
-    NOT_EXIST = "Dieser Nutzer existiert nicht"
-    WRONG = "Falsches Passwort"
-    UNKNOWN = "Etwas ist schief gegangen"
+    active_user = user["user_id"]
+    return None
