@@ -12,6 +12,8 @@ class Error:
     UNKNOWN = "Etwas ist schief gegangen"
 
 active_user: int = 0
+active_game: int = 0
+active_difficulty: int = 0
 
 def register(username: str, password: str, repeated_password: str) -> str:
     """Register a new user - returns str on error and None on súccess"""
@@ -58,3 +60,15 @@ def login(username: str, password: str) -> str:
     # return user id if login was successful
     active_user = user["user_id"]
     return None
+
+def log_out():
+    active_user = 0
+
+def continue_game(game: int):
+    active_game = game
+    # stuff to load spielstand
+
+def play_game(game: int, difficulty: int):
+    active_game = game
+    active_difficulty = difficulty
+    # and stuff
