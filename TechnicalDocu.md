@@ -35,6 +35,19 @@ else:
     print("No Error has occured")
 ```
 
+### **Hashing Passwords**
+When registering a user, the `salt` is set to a random sequence of bytes
+
+The entered plain text `password` then gets encoded into bytes, added onto the salt and hashed using SHA-256
+
+Both the `salt` and the combined, hashed `password` get stored as hex strings in the database
+
+When loggin in and the username is matching, the plain text `password`, that the user typed in, and the `salt` form the database, get added onto one another and hashed
+
+If the resulting hash matches the `password` from the database, the user is logged in.
+
+Because of the `salt`, even passwords that are the same, won't look the same in the database, increasing security
+
 ### **Get a sorted Leaderboard**
 To get a sorted leaderboard, you can use the `get_leaderboard` method and pass in a field to sort by and if the sorting should be reversed or not
 ```py
