@@ -40,13 +40,14 @@ Move:
 
 **Teilprodukte und Arbeitspakete**
 | Arbeit | Zuständiger:in |
-Grafiken    Art Director Aileeen
-Datenbank    Karin
-KI                Bilal
-GUI (Menu)    Artem
-GUI (Spiel)    Art Director Aileeeeen
-Menu logic    The Brain Nils
-Spiellogik    Executive Producer Yannick
+| - | - |
+| Grafiken | Art Director Aileeen
+| Datenbank | Karin
+| KI | Bilal
+| GUI (Menu) | Artem
+| GUI (Spiel) | Art Director Aileeeeen
+| Menu logic | The Brain Nils
+| Spiellogik | Executive Producer Yannick
 
 **Sonstiges**
 Wir benutzen folgende Libraries:
