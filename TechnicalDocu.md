@@ -1,5 +1,5 @@
 # **Technical Documentation**
-In this documentation, technical details will be explained
+In this documentation, all the technical details will be explained
 
 ## **Menu Logic**
 ### **How to use**
@@ -22,7 +22,7 @@ else:
 ```
 
 ### **Logging in as a User**
-Use the `login` method to check the accounts details and set that user as the active one
+Use the `login` method to check the account's details and set that user as the active one
 
 If there is any error, the method returns a string (`str`) containing an error message, `None` otherwise
 
@@ -42,22 +42,22 @@ The entered plain text `password` then gets encoded into bytes, added onto the s
 
 Both the `salt` and the combined, hashed `password` get stored as hex strings in the database
 
-When loggin in and the username is matching, the plain text `password`, that the user typed in, and the `salt` form the database, get added onto one another and hashed
+When loggin in, and the username is matching, the plain text `password` the user typed in and the `salt` form the database get added onto one another and hashed
 
-If the resulting hash matches the `password` from the database, the user is logged in.
+If the resulting hash matches the hashed `password` from the database, the user is logged in
 
 Because of the `salt`, even passwords that are the same, won't look the same in the database, increasing security
-
-### **Get a sorted Leaderboard**
-To get a sorted leaderboard, you can use the `get_leaderboard` method and pass in a field to sort by and if the sorting should be reversed or not
-```py
-sorted_leaderboard: list[dict] = menu_logic.get_leaderboard("name", False)
-```
 
 ### **Logging out**
 To log out a user, you can call the `logout` method, it just resets the active user
 ```py
 menu_logic.logout()
+```
+
+### **Get a sorted Leaderboard**
+To get a sorted leaderboard, you can use the `get_leaderboard` method and pass in a field to sort by and if the sorting should be reversed or not
+```py
+sorted_leaderboard: list[dict] = menu_logic.get_leaderboard("name", False)
 ```
 
 ### **Start the Game**
