@@ -8,6 +8,7 @@ class game_gui:
 
 testArrayInitial = [[0,2,0,2,0,2],[2,0,2,0,2,0],[0,0,0,0,0,0],[0,0,0,0,0,0],[0,1,0,1,0,1],[1,0,1,0,1,0]]
 testArrayValid = [[0,2,0,2,0,2],[2,0,2,0,2,0],[0,0,0,0,0,0],[3,0,3,0,0,0],[0,1,0,1,0,1],[1,0,1,0,1,0]]
+currentArray = testArrayInitial
 
 testPlayerImg = pygame.image.load('./board_blitz/resources/testPiece.png')
 testEnemyImg = pygame.image.load('./board_blitz/resources/testPieceEnemy.png')
@@ -45,33 +46,39 @@ def drawBoard():
         positionWhite[1] += tileSize
 
 def drawPieces(gameArray):
-    print(gameArray)
-    reiheNr = 0
-    spalteNr = 0
-    for reiheNr in range(0,6):
-        for piece in gameArray[reiheNr]:
+    rowNumber = 0
+    columnNumber = 0
+    # following code iterates over every row and column to draw the game pieces
+    for rowNumber in range(0,6):
+        for piece in gameArray[rowNumber]:
+            position = pygame.Rect((renderStartX+(columnNumber*tileSize)),(renderStartY+(rowNumber*tileSize)),tileSize,tileSize)
             if(piece == 2):
-                testEnemy.draw(window,(renderStartX+(spalteNr*tileSize)),(renderStartY+(reiheNr*tileSize)))
+                testEnemy.draw(window,position)
                 #draws the unclickable enemy pieces
             elif(piece == 1):
-                if testPiecePlayer.draw(window,(renderStartX+(spalteNr*tileSize)),(renderStartY+(reiheNr*tileSize))):
-                    # pieceClickedPosition = [reiheNr[spalteNr]] 
+                if testPiecePlayer.draw(window,position):
+                    # pieceClickedPosition = [rowNumber,columnNumber] 
+                    global currentArray 
+                    global isPieceClicked
+                    currentArray = displayValidMoves()
                     isPieceClicked = True
-                    gameArray = displayValidMoves()
-                    print(gameArray)
-                #supposed to trigger visible moves :/
-            elif(piece == 3) and isPieceClicked:
-                print("not accessed")
-                if testValidMoveIndicator.draw(window,(renderStartX+(spalteNr*tileSize)),(renderStartY+(reiheNr*tileSize))):
-                    gameArray[reiheNr][spalteNr] == 1
+                    # gets the valid moves and saves that a piece has been clicked
+            elif(piece == 3 and isPieceClicked):
+                if testValidMoveIndicator.draw(window,position):
+                    global testArrayInitial
+                    global testArrayValid
+                    testArrayInitial[rowNumber][columnNumber] = 1 # sets the clicked valid move to player piece
+                    testArrayValid[rowNumber][columnNumber] = 1 # this will be made obsolete as soon as we get actual valid move data
+                    currentArray = testArrayInitial
                     isPieceClicked = False
-                #supposed to, when valid move is clicked, to set new position of piece
-            spalteNr += 1
-        spalteNr = 0
-        reiheNr += 1
+            columnNumber += 1
+        columnNumber = 0
+        rowNumber += 1
 
 def displayValidMoves():
+    global testArrayValid
     return testArrayValid
+    # TODO: access game logic for valid moves
 
 pygame.init()
 window = pygame.display.set_mode((1040,800))
@@ -81,17 +88,19 @@ background = background.convert()
 background.fill((150,150,150))
 window.blit(background, (0,0))
 
-drawBoard()
+
 
 run = True
 while run:
 
-    drawPieces(testArrayInitial)
+    drawBoard()
+    drawPieces(currentArray)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
     
     pygame.display.update()      
+    pygame.time.wait(50)
 
 pygame.quit()

@@ -7,16 +7,15 @@ class GamePiecePlayer(gamePieces.GamePiece):
         self.rect = self.image.get_rect()
         self.clicked = False
 
-    def draw(self, window, x, y):
-        self.rect.topleft = (x,y)
+    def draw(self, surface, rect):
+        self.rect.topleft = (rect.x, rect.y)
         isClicked = False
         mousePosition = pygame.mouse.get_pos()
         if self.rect.collidepoint(mousePosition):
             if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 self.clicked = True
                 isClicked = True
-                print("Klick")
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
-        window.blit(self.image, (self.rect.x, self.rect.y))
+        surface.blit(self.image, rect)
         return isClicked
