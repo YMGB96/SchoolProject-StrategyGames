@@ -4,14 +4,15 @@ class database:
 import sqlite3
 
 connection = sqlite3.connect('gamesdb.db')
+connection.row_factory = sqlite3.Row
 cursor = connection.cursor()
 
 sql_table_login ="""
     CREATE TABLE IF NOT EXISTS Login (
     pid_login INTEGER PRIMARY KEY,
-    username VARCHAR(30),     
-    pwhash VARCHAR(30),
-    pwsalt VARCHAR(16)       
+    username VARCHAR(30),
+    pwhash VARCHAR(64),
+    pwsalt VARCHAR(32)
     );""" 
 #PLAIN TEXT USER NAME; SALTED HASH FOR THE PASSWORD
 cursor.execute(sql_table_login)
