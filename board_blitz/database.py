@@ -38,6 +38,7 @@ connection.close()
 #Function to add score to the leaderboard
 # def add_leaderboard_entry(pid, difficulty, gamename, game_won):
 #   connection = sqlite3.connect('gamesdb.db')
+#   connection.row_factory = sqlite3.Row
 #   cursor = connection.cursor()
 #   cursor.execute('INSERT INTO scores(pid, Login.username, gamename, difficulty, game_won) VALUES (?, ?, ?, ?, ?)')), (pid, Login.username, gamename, difficulty, game_won))
 # connection.commit()
@@ -49,6 +50,7 @@ connection.close()
 # SQL command to order the Leaderboard, to be called in the GUI menu "show highscores" 
 # def get_leaderboard(difficulty):
 #   connection = sqlite3.connect('gamesdb.db')
+#   connection.row_factory = sqlite3.Row
 #   cursor = connection.cursor()
 #   cursor.execute('SELECT Login.username, scores.gamename, scores.difficulty, scores.game_won
 #   FROM Login INNER JOIN scores ON Login.pid_login = scores.pid 
