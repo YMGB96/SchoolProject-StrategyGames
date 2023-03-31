@@ -22,9 +22,9 @@ sql_table_scores ="""
     CREATE TABLE IF NOT EXISTS scores (
     pid INTEGER,
     username VARCHAR(30),
-    gamename VARCHAR(30),
+    gamename VARCHAR(16),
     score INT,
-    difficulty VARCHAR(30)    
+    difficulty INT    
     );"""
 cursor.execute(sql_table_scores)
 
