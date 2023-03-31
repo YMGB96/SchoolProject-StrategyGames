@@ -1,56 +1,20 @@
-**Scope - was brauchen wir alles**
-Datenbank (IN/OUT: Read/Write)
-- Bestenliste
-- Login
-- Spielstände
-GUI (Menu)
-- IN: User Input
-- IN: “Change Scene”
-- OUT: Clicked on *BUTTON* :slight_smile:
-Menu logic (Menu and “Esc”-Screen)
-- IN: Button that was clicked
-- IN: Datenbanken
-- OUT: Login DB (oder Gast)
-- OUT: Spielstand von aktuellem User (oder leerer Spielstand)
-GUI (Game)
-- IN: User Input
-- IN: 2d (6x6) Array
-- OUT: Move
-Logik der Spiele (Dame, Bauernschach)
-- IN: Spielstand
-- IN: Move
-- OUT: 2d (6x6) Array
-- OUT: Valid Moves
-- OUT: Spielstand
-Grafiken
-KI 
-- IN: Spielstand
-- IN: Difficulty (Depth)
-- OUT: Move
+# **Board Blitz**
+This is a collection of 2 boardgames - a variant of **checkers** and **chess** with only pawns
 
-**Wie sehen unsere Strukturen aus?**
-Datenbanken:
-- Login( User ID, Name, Pw Hash, Pw Salt )
-- Spielstände( User ID, Board 1, (log?), Board 2, (log?) )
-- Bestenliste( User ID, Game, Result, Difficulty, (Time, Moves,, …) )
-Spielstand:
-- 2d 6x6 Array
-Move:
-- (team, (from_x, from_y), (to_x, to_y)) or something
+## **Prerequisites**
+1. Download or clone this repository and move to it with a terminal
 
-**Teilprodukte und Arbeitspakete**
-| Arbeit | Zuständiger:in |
-| - | - |
-| Grafiken | Art Director Aileeen
-| Datenbank | Karin
-| KI | Bilal
-| GUI (Menu) | Artem
-| GUI (Spiel) | Art Director Aileeeeen
-| Menu logic | The Brain Nils
-| Spiellogik | Executive Producer Yannick
+2. Make sure that you have [python 3.10 or newer](https://www.python.org/downloads/) installed
 
-**Sonstiges**
-Wir benutzen folgende Libraries:
-  Python
-  Sqlite3
-  PyGame
+3. If you get an error when running `python -V`, add python to your `PATH` variable
+
+4. You can then install the dependencies using:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## **Start the Game**
+Once you've met all the prerequisits, you can start the game using:
+```bash
+python board_blitz
+```
