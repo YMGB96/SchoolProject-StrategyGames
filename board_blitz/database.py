@@ -1,6 +1,7 @@
 class database:
     def __init__(self) -> None:
         pass
+
 import sqlite3
 
 connection = sqlite3.connect('gamesdb.db')
@@ -22,8 +23,8 @@ sql_table_scores ="""
     pid INTEGER,
     username VARCHAR(30),
     gamename VARCHAR(16),
-    difficulty INT, 
-    game_won INT 
+    difficulty INTEGER, 
+    game_won INTEGER 
     );"""
 cursor.execute(sql_table_scores)
 
@@ -38,9 +39,9 @@ connection.close()
 #Function to add score to the leaderboard
 # def add_leaderboard_entry(pid, difficulty, gamename, game_won):
 #   connection = sqlite3.connect('gamesdb.db')
-#   connection.row_factory = sqlite3.Row
+#   connection.row_factory = sqlite3.Row    
 #   cursor = connection.cursor()
-#   cursor.execute('INSERT INTO scores(pid, Login.username, gamename, difficulty, game_won) VALUES (?, ?, ?, ?, ?)')), (pid, Login.username, gamename, difficulty, game_won))
+#   cursor.execute('INSERT INTO scores(pid, username, gamename, difficulty, game_won) VALUES (?, ?, ?, ?, ?)', (pid, username, gamename, difficulty, game_won))
 # connection.commit()
 # connection.close()
 
@@ -52,9 +53,11 @@ connection.close()
 #   connection = sqlite3.connect('gamesdb.db')
 #   connection.row_factory = sqlite3.Row
 #   cursor = connection.cursor()
-#   cursor.execute('SELECT Login.username, scores.gamename, scores.difficulty, scores.game_won
-#   FROM Login INNER JOIN scores ON Login.pid_login = scores.pid 
-#   WHERE scores.difficulty = ? 
-#   ORDER BY scores.gamename DESC, scores.game_won DESC LIMIT 15') 
-#   return cursor.fetchall()
-# connection.close()
+#   cursor.execute('SELECT Login.username, scores.gamename, scores.difficulty, scores.game_won \
+#   FROM Login INNER JOIN scores ON Login.pid_login = scores.pid \
+#   WHERE scores.difficulty = ? \
+#   ORDER BY scores.gamename DESC, scores.game_won DESC LIMIT 15', (difficulty,)) 
+#   rows = cursor.fetchall()
+#   connection.commit()
+#   connection.close()
+#   return rows
