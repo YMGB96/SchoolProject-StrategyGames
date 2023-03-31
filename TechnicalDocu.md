@@ -1,7 +1,20 @@
 # **Technical Documentation**
-In this documentation, all the technical details will be explained
+In this documentation, all the **technical details** will be explained
+
+## **Run the Tests**
+To run the tests, you first need to `cd` into the package directory using:
+```bash
+cd board_blitz
+```
+Then you can start the tests by running:
+```bash
+python -m unittest tests
+```
+For subsequent runs of the tests, you don't need to `cd` again since you are allready in the correct folder
 
 ## **Menu Logic**
+Contains a class that handles the logic of everything **outside of the game**, from registration and login to the leaderboard
+
 ### **How to use**
 To talk to any part of the menu logic, you can import it the variable `menu_logic` of type `MenuLogic` using the following line:
 ```py
@@ -38,15 +51,15 @@ else:
 ### **Hashing Passwords**
 When registering a user, the `salt` is set to a random sequence of bytes
 
-The entered plain text `password` then gets encoded into bytes, added onto the salt and hashed using SHA-256
+The entered plain text `password` then gets encoded into bytes, added onto the salt and **hashed using SHA-256**
 
 Both the `salt` and the combined, hashed `password` get stored as hex strings in the database
 
 When loggin in, and the username is matching, the plain text `password` the user typed in and the `salt` form the database get added onto one another and hashed
 
-If the resulting hash matches the hashed `password` from the database, the user is logged in
+If the **resulting hash matches the hashed `password` from the database**, the user is logged in
 
-Because of the `salt`, even passwords that are the same, won't look the same in the database, increasing security
+Because of the `salt`, even passwords that are the same, won't look the same in the database, **increasing security**
 
 ### **Logging out**
 To log out a user, you can call the `logout` method, it just resets the active user
