@@ -59,7 +59,7 @@ class MenuLogic:
         hashed_password: str = hashed.hexdigest()
         if user["password"] != hashed_password:
             return Error.WRONG
-        # return user id if login was successful
+        # set active user if login was successful
         self.active_user = int(user["user_id"])
         return None
 
@@ -72,7 +72,7 @@ class MenuLogic:
 
     def start_game(self):
         """Start the game, this expects difficulty and game to be set"""
-        game_logic.start(self.active_user, self.active_game, self.active_difficulty, None)
+        game_logic.start(self.active_user, self.active_game, self.active_difficulty)
 
     def get_leaderboard(self, sort_by: str, reverse: bool) -> list[dict]:
         """Get a sorted leaderboard to be displayed"""
