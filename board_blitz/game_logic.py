@@ -8,7 +8,7 @@ class Game_Logic:
     game: int
     difficulty: int
     board: list[list[int]]
-    consecutive_turn_count= 0
+    #consecutive_turn_count= 0
 
     def start(self, active_user, active_game, active_difficulty):
         self.player_turn = True
@@ -74,6 +74,9 @@ class Game_Logic:
                             if self.board[y+1][x+1] == 1:
                                 moves.append([(y,x),(y+1,x+1)])
                     print(moves)
+                    if moves == []:
+                        self.game_is_finished(player_turn: False, valid_moves_empty: True)
+                        return
                     return moves
             elif self.game == 1:
                 if player_turn: #valid moves for single selected piece by player            
@@ -111,6 +114,9 @@ class Game_Logic:
                                 if self.board[y+1][x+1] == 0:
                                     moves.append([(y,x),(y+1,x+1)])
                         return moves
+                    if moves == []:
+                        self.game_is_finished(player_turn: False, valid_moves_empty: True)
+                        return
                     else:
                         return moves
             
@@ -128,35 +134,35 @@ class Game_Logic:
                     self.board[beaten_piece_Y][beaten_piece_X] = 0
                     if move[1][1]>=2 and self.board[move[1][0]-1][move[1][1]-1] == 2 and self.board[move[1][0]-2][move[1][1]-2] == 0:
                         self.board[move[1][0]-2][move[1][1]-2] = 3
-                        self.consecutive_turn_count +=1
+                        #self.consecutive_turn_count +=1
                         game_gui.playerAlertOrWhatever(self.board) #placeholder for telling the human player that it's still his turn, sending only the next jump as move
                     elif move[1][1]<=3 and self.board[move[1][0]-1][move[1][1]+1] == 2 and self.board[move[1][0]-2][move[1][1]+2] == 0:
                         self.board[move[1][0]-2][move[1][1]+2] = 3
-                        self.consecutive_turn_count +=1
+                        #self.consecutive_turn_count +=1
                         game_gui.playerAlertOrWhatever(self.board)  #placeholder for telling the human player that it's still his turn, sending only the next jump as move
                                                                     #must become impossible to change piece (via gui or restriction in logic?)                
                     else:
-                        self.consecutive_turn_count = 0
+                        #self.consecutive_turn_count = 0
                         ai.kickoffai #tell ai to go
+            ai.kickoff #tell ai to go
         else:
             self.board[move[0][0]][move[0][1]] = 0
             self.board[move[1][0]][move[1][1]] = 2
             if self.game == 1:
-                if move[0][0] +2 == move[1][0]:
+                if move[0][0] -2 == move[1][0]:
+                    moves = []
                     beaten_piece_X = (move[0][1] + move[1][1])/2
                     beaten_piece_Y = (move[0][0] + move[1][0])/2
                     self.board[beaten_piece_Y][beaten_piece_X] = 0
-                    if move[1][1]>=2 and self.board[move[1][0]-1][move[1][1]-1] == 2 and self.board[move[1][0]-2][move[1][1]-2] == 0:
-                        self.board[move[1][0]-2][move[1][1]-2] = 3
-                        self.consecutive_turn_count +=1
-                        game_gui.playerAlertOrWhatever(self.board) #placeholder for telling the human player that it's still his turn, sending only the next jump as move
-                    if move[1][1]<=3 and self.board[move[1][0]-1][move[1][1]+1] == 2 and self.board[move[1][0]-2][move[1][1]+2] == 0:
-                        self.board[move[1][0]-2][move[1][1]+2] = 3
-                        self.consecutive_turn_count +=1
-                        game_gui.playerAlertOrWhatever(self.board) #placeholder for telling the human player that it's still his turn, sending only the next jump as move            
+                    if move[1][1]>=2 and self.board[move[1][0]+1][move[1][1]-1] == 1 and self.board[move[1][0]+2][move[1][1]-2] == 0:
+                        moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]-2)])
+                    if move[1][1]<=3 and self.board[move[1][0]+1][move[1][1]+1] == 1 and self.board[move[1][0]+2][move[1][1]+2] == 0:
+                        moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]+2)])
+                    if moves != []:
+                        #send moves to ai.                
                     else:
-                        self.consecutive_turn_count = 0
-                        ai.kickoffai #tell ai to go
+                        #self.consecutive_turn_count = 0
+                        game_gui.playerAlertOrWhatever(self.board)
 
 
 
@@ -164,13 +170,14 @@ class Game_Logic:
     def game_is_finished(self,*args, **kwargs):
         game_cancelled = kwargs.get('game_cancelled', False)
         valid_moves_empty = kwargs.get('valid_moves_empty', False)
+        player_turn = kwargs.get('player_turn', True)
         for column in self.board[0]:
             if column == 1:
                 print("placeholder, send win bool")
                 game_won = True
                 #game_gui.gameover(game_won)
                 # SQL befehl mit daten  
-                #fancy schmancy info to gui that game is over and lost, loss into database
+                #fancy schmancy info to gui that game is over and won, win into database
                 return
         for column in self.board[5]:
             if column == 2:
@@ -181,7 +188,18 @@ class Game_Logic:
                 #fancy schmancy info to gui that game is over and lost, loss into database
                 return
         if valid_moves_empty:
-            return
+            if player_turn:
+                game_won = False
+                #game_gui.gameover(game_won)
+                # SQL befehl mit daten  
+                #fancy schmancy info to gui that game is over and lost, loss into database
+                return
+            elif:
+                game_won = True
+                #game_gui.gameover(game_won)
+                # SQL befehl mit daten  
+                #fancy schmancy info to gui that game is over and won, win into database
+                return
         if game_cancelled:
             game_won = False
             #game_gui.gameover(game_won, game_cancelled)
