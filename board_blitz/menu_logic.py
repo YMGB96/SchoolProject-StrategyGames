@@ -30,9 +30,9 @@ class MenuLogic:
         user_id: int = 0
         users: list[dict] = database.get_users()
         for user in users:
-            if user.get("name") == username:
+            if user.get('name') == username:
                 return Error.EXISTS
-            uid: int = int(user.get("user_id"))
+            uid: int = int(user.get('user_id', 0))
             if uid > user_id: user_id = uid
         user_id += 1
         # save registration to database, return error if it fails
@@ -40,7 +40,7 @@ class MenuLogic:
             return Error.SAVE
         # set active user id and return no error
         self.active_user = user_id
-        return None
+        return ''
 
     def login(self, username: str, password: str) -> str:
         """Log in with username and password - returns str on error and None on success"""
@@ -50,18 +50,18 @@ class MenuLogic:
         try:
             user = next(filter( # https://stackoverflow.com/questions/8534256/find-first-element-in-a-sequence-that-matches-a-predicate
                 lambda user:
-                    user["name"] == username,
+                    user['name'] == username,
                 users))
         except: return Error.NOT_EXIST
         # compare passwords
-        salt = bytes.fromhex(user["salt"])
+        salt = bytes.fromhex(user['salt'])
         hashed = sha256(salt + password.encode())
         hashed_password: str = hashed.hexdigest()
-        if user["password"] != hashed_password:
+        if user['password'] != hashed_password:
             return Error.WRONG
         # set active user if login was successful
-        self.active_user = int(user["user_id"])
-        return None
+        self.active_user = int(user['user_id'])
+        return ''
 
     def logout(self):
         """Resets the user"""

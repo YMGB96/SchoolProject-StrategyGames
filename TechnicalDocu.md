@@ -73,7 +73,7 @@ The file also has the **global variable** `menu_logic`, that is an **instance** 
 ### **Registering a User**
 Use the `register` method, to register a user and set them as the active user
 
-If there is any error, the method returns a string (`str`) containing an error message, `None` otherwise
+If there is any error, the method returns a string (`str`) containing an error message, an empty string otherwise
 ```py
 err: str = menu_logic.register("username", "password", "password")
 if err:
@@ -86,7 +86,7 @@ else:
 ### **Logging in as a User**
 Use the `login` method to check the account's details and set that user as the active one
 
-If there is any error, the method returns a string (`str`) containing an error message, `None` otherwise
+If there is any error, the method returns a string (`str`) containing an error message, an empty string otherwise
 
 ```py
 err: str = menu_logic.login("username", "password")
