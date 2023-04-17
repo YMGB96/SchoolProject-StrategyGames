@@ -1,238 +1,183 @@
-import pygame
-from gamePieces import GamePiece
-from gamePiecesPlayer import GamePiecePlayer
+import pygame as pg
+from math import floor
 
-class game_gui:
+class GameGui:
     is_paused = False
     colors = {
-        'black': (90, 90, 90),
-        'white': (255, 255, 255),
-        'background': (150, 150, 150),
+        'black': (116, 116, 116),
+        'white': (222, 222, 222),
+        'background': (245, 245, 245),
+        'text': (0, 0, 0),
+        'button': (158, 158, 158),
     }
-    images = {
-            'player': pygame.image.load('./board_blitz/resources/testPiece.png'),
-            'enemy': pygame.image.load('./board_blitz/resources/testPieceEnemy.png'),
-            'valid': pygame.image.load('./board_blitz/resources/validMove.png'),
+    texts = {
+        'menu': 'Menu',
+        'resume': 'Zurück zum Spiel',
+        'surrender': 'Spiel aufgeben',
+    }
+    selected_piece = [-1, -1]
+    was_pressed = False
+    def __init__(self, width = 1125, height = 800):
+        # Set up window
+        self.window = pg.display.set_mode((width,height))
+        # Get tile size and offset
+        tile_size = floor(height * 0.146)
+        start_x = floor(width * 0.223)
+        start_y = height // 2 - tile_size * 3
+        # Fill board with black/white squares
+        self.board = []
+        for i in range(6):
+            self.board.append([])
+            for j in range(6):
+                dimensions = [start_x + tile_size * j,
+                              start_y + tile_size * i,
+                              tile_size, tile_size]
+                color = (self.colors['black'] if (i+j)%2 == 0
+                    else self.colors['white'])
+                sprite = Sprite(self.window, None, dimensions, color)
+                sprite.border_radius = 0
+                self.board[i].append(sprite)
+        # Scale and set images for player, enemy and valid spots
+        piece_scale = tile_size * 0.8
+        self.images = {
+            'player': pg.transform.scale(pg.image.load('./board_blitz/resources/testPiece.png'), (piece_scale, piece_scale)),
+            'enemy': pg.transform.scale(pg.image.load('./board_blitz/resources/testPieceEnemy.png'), (piece_scale, piece_scale)),
+            'valid': pg.transform.scale(pg.image.load('./board_blitz/resources/validMove.png'), (piece_scale, piece_scale)),
         }
-    def __init__(self, width = 1040, height = 800):
-        self.width = width
-        self.height = height
-        self.window = pygame.display.set_mode((width,height))
-        self.tile_size = self.height // 7
-        self.start_x = self.width // 5
-        self.start_y = self.tile_size // 2
-        self.pieces = {
-            'player': cliackable_piece(
-                pygame.image.load('./board_blitz/resources/testPiece.png'),
-                self.window,
-                self.tile_size, self.tile_size ),
-            'enemy': piece(
-                pygame.image.load('./board_blitz/resources/testPieceEnemy.png'),
-                self.window,
-                self.tile_size, self.tile_size ),
-            'valid': cliackable_piece(
-                pygame.image.load('./board_blitz/resources/validMove.png'),
-                self.window,
-                self.tile_size, self.tile_size ),
+        # Set up all menu buttons
+        fontsize = floor(height * 0.023)
+        font = pg.font.SysFont('Arial Black', fontsize)
+        button_height = floor(height * 0.060)
+        y_buffer = floor(height * 0.030)
+        self.menu_buttons = {
+            'menu': Sprite(self.window, font.render(
+                self.texts['menu'], True, self.colors['text'] ), 
+                [floor(width * 0.026), floor(height * 0.060),
+                 floor(width * 0.174), button_height],
+                self.colors['button']),
+            'resume': Sprite(self.window, font.render(
+                self.texts['resume'], True, self.colors['text'] ), 
+                [floor(width * 0.043), height//2 - y_buffer//2 - button_height,
+                 floor(width * 0.328), button_height],
+                self.colors['background']),
+            'surrender': Sprite(self.window, font.render(
+                self.texts['surrender'], True, self.colors['text'] ), 
+                [floor(width * 0.043), height//2 + y_buffer//2,
+                 floor(width * 0.328), button_height],
+                self.colors['background']),
         }
 
-    def drawText(textToDraw, font, textColour, x, y):
-        text = font.render(textToDraw, True, textColour)
-        window.blit(text, (x,y))
-
-    def drawBoard(self, board: list[list[int]]):
-        # tile_size = self.height // 7
-        # start_x = self.width // 5
-        # start_y = tile_size // 2
-        for x, row in enumerate(board):
+    def draw_board(self, board: list[list[int]]):
+        """Updates all sprites according to the given board and renders it"""
+        # go through the whole board
+        for x, row in enumerate(self.board):
             for y, piece in enumerate(row):
-                # draw background
-                is_white = (x+y)%2 == 0
-                pygame.draw.rect(self.window,
-                    self.colors['white'] if is_white else self.colors['black'],
-                    [self.start_x + x*self.tile_size,
-                     self.start_y + y*self.tile_size,
-                     self.tile_size,
-                     self.tile_size])
-                if piece == 0:
-                    continue
-                if sprite := (self.pieces['player'] if piece == 1
-                          else self.pieces['enemy'] if piece == 2
-                          else self.pieces['valid'] if piece == 3
-                else None):
-                    sprite.draw(self.start_x + x*self.tile_size, self.start_y + y*self.tile_size)
-                    
+                # set correct sprites
+                match board[x][y]:
+                    case 1: piece.surface = self.images['player']
+                    case 2: piece.surface = self.images['enemy']
+                    case 3: piece.surface = self.images['valid']
+                # draw each piece
+                piece.draw()
+                # remember what piece was last clicked
+                if not self.was_pressed and not self.is_paused and piece.is_clicked():
+                    last_piece = self.selected_piece
+                    self.selected_piece = [x, y]
+                    if last_piece != self.selected_piece:
+                        # here we know that a new piece was selected and board[x][y] is it's id
+                        print(board[x][y])
 
+    def render(self):
+        # fill the background
+        background = pg.Surface(self.window.get_size())
+        background.fill(self.colors['background'])
+        self.window.blit(background, (0,0))
+        # draw the current board
+        test_board = [[0,2,0,2,0,2],
+                      [2,0,2,0,2,0],
+                      [0,0,0,0,0,0],
+                      [0,0,0,0,0,0],
+                      [0,1,0,1,0,1],
+                      [1,0,1,0,1,0]]
+        self.draw_board(test_board)
+        # draw the menu button in the corner
+        self.menu_buttons['menu'].draw()
+        # check if it has been clicked
+        if not self.was_pressed and self.menu_buttons['menu'].is_clicked():
+            self.is_paused = True
+        # render additional elements if the game is paused
+        if self.is_paused:
+            # overlay to darken the game elements
+            overlay = pg.Surface(self.window.get_size())
+            overlay.set_alpha(110)
+            overlay.fill((0,0,0))
+            self.window.blit(overlay, (0,0))
+            # render 'paused' buttons
+            self.menu_buttons['resume'].draw()
+            self.menu_buttons['surrender'].draw()
+            # check if the buttons have been clicked
+            if not self.was_pressed and self.menu_buttons['resume'].is_clicked():
+                self.is_paused = False
+        # update mouse was pressed
+        self.was_pressed = pg.mouse.get_pressed()[0]
 
-
-        positionBlack = [renderStartX,renderStartY,tileSize,tileSize]
-        positionWhite = [tileSize*2,renderStartY,tileSize,tileSize]
-        for height in range(0,6):
-            if (height%2 == 0):
-                positionBlack[0] = renderStartX+tileSize
-                positionWhite[0] = renderStartX
-            else:
-                positionBlack[0] = renderStartX
-                positionWhite[0] = renderStartX+tileSize
-            for width in range (0,3):
-                pygame.draw.rect(window,(90,90,90),(positionBlack))
-                pygame.draw.rect(window,(255,255,255),(positionWhite))
-                positionBlack[0] += tileSize*2
-                positionWhite[0] += tileSize*2
-                width += 1
-            height += 1
-            positionBlack[1] += tileSize
-            positionWhite[1] += tileSize
-
-    def drawPieces(gameArray):
-        rowNumber = 0
-        columnNumber = 0
-        # following code iterates over every row and column to draw the game pieces
-        for rowNumber in range(0,6):
-            for piece in gameArray[rowNumber]:
-                position = pygame.Rect((renderStartX+(columnNumber*tileSize)),(renderStartY+(rowNumber*tileSize)),tileSize,tileSize)
-                if(piece == 2):
-                    testEnemy.draw(window,position)
-                    #draws the unclickable enemy pieces
-                elif(piece == 1):
-                    if testPiecePlayer.draw(window,position):
-                        # pieceClickedPosition = [rowNumber,columnNumber] 
-                        global currentArray 
-                        global isPieceClicked
-                        currentArray = displayValidMoves()
-                        isPieceClicked = True
-                        # gets the valid moves and saves that a piece has been clicked
-                elif(piece == 3 and isPieceClicked):
-                    if testValidMoveIndicator.draw(window,position):
-                        global testArrayInitial
-                        global testArrayValid
-                        testArrayInitial[rowNumber][columnNumber] = 1 # sets the clicked valid move to player piece
-                        testArrayValid[rowNumber][columnNumber] = 1 # this will be made obsolete as soon as we get actual valid move data
-                        currentArray = testArrayInitial
-                        isPieceClicked = False
-                columnNumber += 1
-            columnNumber = 0
-            rowNumber += 1
-
-    def displayValidMoves():
-        return testArrayValid
-        # TODO: access game logic for valid moves
-
-    def pauseButton():
-        positionPauseButton = pygame.Rect(10,10,60,60)
-        global isPaused
-        if testButton.draw(window,positionPauseButton) and not isPaused:
-            isPaused = True
-            print("Pause clicked")
-            # pygame.draw.rect(window,(0,0,0),(screenWidth,screenHeight,0,0)) # should do an overlay screen but doesn't :)
-
-    def drawPauseMenu():
-        positionAbortButton = pygame.Rect(30,(screenHeight/2+120),tileSize,tileSize)
-        positionMainMenuButton = pygame.Rect(30,(screenHeight/2),tileSize,tileSize)
-        positionBackButton = pygame.Rect(30,(screenHeight/2-120),tileSize,tileSize)
-        global isPaused
-        if testButtonMenu.draw(window,positionAbortButton) and isPaused == True:
-            print("Spiel aufgeben")
-        if testButtonMenu.draw(window,positionMainMenuButton) and isPaused == True:
-            print("Hauptmenü")
-        if testButtonMenu.draw(window,positionBackButton) and isPaused == True:
-            print("Zurück zum Spiel")
-            isPaused = False
-
-class piece:
-    def __init__(self, image, window, width, height):
+class Sprite:
+    """Abstraction of a 'thing to render', knows if it is clicked or not"""
+    border_radius = 5
+    def __init__(self, window, surface, dimensions, color):
+        self.color = color
         self.window = window
-        self.image = image
-        self.width = width
-        self.height = height
+        self.surface = surface
+        self.dimensions = dimensions
 
-    def draw(self, x, y) -> bool:
-        img = pygame.transform.scale(self.image, (self.width, self.height))
-        self.window.blit(img, (x, y))
-        return False
+    def draw(self):
+        """Draws the Sprite to the screen including it's background"""
+        # Draw background
+        pg.draw.rect(self.window, self.color, self.dimensions, border_radius = self.border_radius)
+        # Return early if there is no surface
+        if not self.surface: return
+        # Calculate offset to have image/text centered on background
+        x, y, dx, dy = self.dimensions
+        dx2, dy2 = self.surface.get_size()
+        x += dx//2 - dx2//2
+        y += dy//2 - dy2//2
+        # Draw the image/text
+        self.window.blit(self.surface, (x, y))
 
-class cliackable_piece(piece):
-    def draw(self, x, y) -> bool:
-        img = pygame.transform.scale(self.image, (self.width, self.height))
-        self.window.blit(img, (x, y))
-        mouse_pos = pygame.mouse.get_pos()
-        clicked = (pygame.mouse.get_pressed()[0] == 1 and
-                   mouse_pos[0] >= x and mouse_pos[1] <= x + self.width and
-                   mouse_pos[1] >= y and mouse_pos[1] <= y + self.height)
-        return clicked
+    def get_offset(self) -> tuple[int, int]:
+        return (self.dimensions[0], self.dimensions[1])
 
+    def get_size(self) -> tuple[int, int]:
+        return (self.dimensions[2], self.dimensions[3])
 
-pygame.font.init()
-
-testArrayInitial = [[0,2,0,2,0,2],
-                    [2,0,2,0,2,0],
-                    [0,0,0,0,0,0],
-                    [0,0,0,0,0,0],
-                    [0,1,0,1,0,1],
-                    [1,0,1,0,1,0]]
-testArrayValid = [[0,2,0,2,0,2],
-                  [2,0,2,0,2,0],
-                  [0,0,0,0,0,0],
-                  [3,0,3,0,0,0],
-                  [0,1,0,1,0,1],
-                  [1,0,1,0,1,0]]
-currentArray = testArrayInitial
-
-testPlayerImg = pygame.image.load('./board_blitz/resources/testPiece.png')
-testEnemyImg = pygame.image.load('./board_blitz/resources/testPieceEnemy.png')
-testValidMove = pygame.image.load('./board_blitz/resources/validMove.png')
-
-testButtonRect = pygame.image.load('./board_blitz/resources/validMove.png')
-
-testPiecePlayer = GamePiecePlayer(testPlayerImg)
-testEnemy = GamePiece(testEnemyImg)
-testValidMoveIndicator = GamePiecePlayer(testValidMove)
-
-testButton = GamePiecePlayer(testButtonRect)
-testButtonMenu = GamePiecePlayer(testButtonRect)
-
-screenWidth = 1040
-screenHeight = 800
-
-renderStartX = 100
-renderStartY = 70
-tileSize = 60
-
-isPaused = False
-
-isPieceClicked = False
-pieceClickedPosition = []
-    
-font = pygame.font.SysFont("arialblack",20)
-textColour = (0,0,0)
-
-#functions
+    def is_clicked(self) -> bool:
+        x, y = self.get_offset()
+        dx, dy = self.get_size()
+        mx, my = pg.mouse.get_pos()
+        pressed = pg.mouse.get_pressed()[0]
+        return (pressed and
+                x < mx < x+dx and
+                y < my < y+dy)
 
 
-pygame.init()
-window = pygame.display.set_mode((screenWidth,screenHeight))
 
-background = pygame.Surface(window.get_size())
-background = background.convert()
-background.fill((150,150,150))
-window.blit(background, (0,0))
+pg.init()
+pg.font.init()
+game_gui = GameGui()
 
 run = True
 while run:
 
-    drawBoard()
-    drawPieces(currentArray)
-    pauseButton()
-    if isPaused:
-        drawPauseMenu()
-    drawText("Spielername",font,textColour,30,(screenHeight-30))
-    drawText("Gegner",font,textColour,(screenWidth-100),30)
+    game_gui.render()
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    # drawText("Spielername",font,textColour,30,(screenHeight-30))
+    # drawText("Gegner",font,textColour,(screenWidth-100),30)
+
+    for event in pg.event.get():
+        if event.type == pg.QUIT:
             run = False
     
-    pygame.display.update()      
-    pygame.time.wait(50)
+    pg.display.update()
+    pg.time.wait(50)
 
-pygame.quit()
+pg.quit()
