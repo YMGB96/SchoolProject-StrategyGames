@@ -83,7 +83,7 @@ checkers_board = [
 
 ai_num = 2
 player_num = 1
-#AI für Dame
+#AI for checkers
 
 #same as the rate_board function
 def rate_checkers_board(checkers_board: list[list[int]]) -> int:
@@ -103,17 +103,20 @@ def highest_ai_stone(checkers_board, ai_num):
     # indices start at 0 so we have a position of (0, 0)
     highest_row = -1
     highest_col = -1
-    # loop through the whole board 
+    # loop through the whole board searching for ai stones
     for row in range(len(checkers_board)):
         for col in range(len(checkers_board[row])):
-            # if a stone is found it compares the row number to the highest_row
+            # if a ai stone is found it compares the row number to the highest_row
             if checkers_board[row][col] == ai_num:
                 if row > highest_row:
                     # updates the highest_row and _col with the new position
                     highest_row = row
                     highest_col = col
+    # if highest row and highest column still have their values -1 it returns None
+    # to indicate that there are no ai stones on the board 
     if highest_row == -1 and highest_col == -1:
         return None
+    # If it found a stone it returns the row and column position of the highest ai stone
     else:
         return (highest_row, highest_col)
 
@@ -140,16 +143,30 @@ def find_diagonal(checkers_board, num):
     diagonal_moves = []
     # checks row after row in a loop 
     for row in range(len(checkers_board)):
+        # checks column after column in a loop
         for col in range(len(checkers_board[row])):
             # if there is a piece at ex. [2][2] it checks where it could move to diagonally
             if checkers_board[row][col] == num:
                 # checks if it could move to the upper left, upper ight, or lower left, lower right
                 for dr, dc in [(-1,-1),(-1,1),(1,-1),(1,1)]:
-
-                    # WORK IN PROGRESS
-    
-    
+                    # Checks if the diagonal position is inside the chessboard and empty
+                    if 0 <= row+dr < len(checkers_board) and 0 <= col+dc < len(checkers_board[row]) and checkers_board[row+dr][col+dc] == 0:
+                        # If the current player's piece matches the AI's piece
+                        # the move (start and target positions) is added to the diagonal_moves list
+                        if num == ai_num:
+                            diagonal_moves.append((row, col, row+dr, col+dc))
+                            # If the current player's piece does not match the AI's piece
+                            # only the move's target position is added to the diagonal_moves list.
+                        else:
+                            diagonal_moves.append((row+dr, col+dc))
     return diagonal_moves
+
+# prin the results
+print("free diagonals for AI stones: ")
+print(find_diagonal(checkers_board, ai_num))
+print("free diagonals for player stones: ")
+print(find_diagonal(checkers_board, player_num))
+
 
 
 
