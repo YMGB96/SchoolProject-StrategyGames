@@ -1,5 +1,5 @@
-import ai
-import game_gui
+#import ai
+#import game_gui
 import sqlite3
 
 class Game_Logic:
@@ -137,7 +137,7 @@ class Game_Logic:
                 self.board[move[0][0]][move[0][1]] = 0
                 self.board[move[1][0]][move[1][1]] = 1
                 if self.game == 1:
-                    board_preview = self.board
+                    board_preview = [row.copy() for row in self.board]
                     if move[0][0]-2 == move[1][0]:
                         beaten_piece_X = (move[0][1] + move[1][1])//2
                         beaten_piece_Y = (move[0][0] + move[1][0])//2
