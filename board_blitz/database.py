@@ -11,8 +11,8 @@ class Database:
     CREATE TABLE IF NOT EXISTS Login (
     user_id INTEGER PRIMARY KEY,
     username VARCHAR(30),
-    hashed_password VARCHAR(64),
-    salt VARCHAR(32)
+    hashed_password CHAR(64),
+    salt CHAR(32)
     );""" 
     #PLAIN TEXT USER NAME; SALTED HASH FOR THE PASSWORD
     cursor.execute(sql_table_login)
