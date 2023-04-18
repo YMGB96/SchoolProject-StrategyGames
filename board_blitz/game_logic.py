@@ -48,7 +48,7 @@ class Game_Logic:
             posY = chosen_piece[0]
             posX = chosen_piece[1]
         board_preview = self.board
-        if self.consecutive_move == False:
+        if self.player_turn and self.consecutive_move:
             return
         else:
             if self.game == 0:     
@@ -143,7 +143,7 @@ class Game_Logic:
                             self.consecutive_move = True
                             board_preview[move[1][0]-2][move[1][1]+2] = 3
                         if any(3 in row for row in self.board) == True:
-                            game_gui.playerAlertOrWhatever(self.board)  #placeholder for telling the human player that it's still his turn, sending only the next jump(s) as move
+                            game_gui.playerAlertOrWhatever(board_preview)  #placeholder for telling the human player that it's still his turn, sending only the next jump(s) as move
                             return
                         else:
                             self.player_turn = False
