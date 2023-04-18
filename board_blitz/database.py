@@ -22,7 +22,7 @@ class Database:
     CREATE TABLE IF NOT EXISTS scores (        
         pid INTEGER PRIMARY KEY,
         username VARCHAR(30),
-        gamename VARCHAR(30),
+        gamename INTEGER,
         difficulty INTEGER,
         game_won INTEGER
         );"""
@@ -33,4 +33,4 @@ class Database:
     connection.close()
 
 #difficulty:  1 = leicht / 2 = mittel / 3 = schwer
-#game_won: win, lose, giveup
+#game_won: win, lose, giveup; 0 or 1
