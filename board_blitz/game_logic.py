@@ -1,5 +1,6 @@
-import ai as ai
-import game_gui as game_gui
+import ai
+import game_gui
+import database
 
 class Game_Logic:
 
@@ -72,7 +73,6 @@ class Game_Logic:
                         if x <= 4:
                             if self.board[y+1][x+1] == 1:
                                 moves.append([(y,x),(y+1,x+1)])
-                    print(moves)
                     if moves == []:
                         self.game_is_finished(player_turn= False, valid_moves_empty= True)
                         return
@@ -123,6 +123,7 @@ class Game_Logic:
 
     def switch_turn(self, move: tuple[tuple[int]]):
         move = move
+        player_moves = []
         if self.game_is_finished():
             return
         else:
@@ -172,10 +173,43 @@ class Game_Logic:
                             return
                         else:
                             self.player_turn = True
+                            #####
+                            for y,x in self.find_all(self.board, 1):                
+                                if x >= 2:
+                                    if self.board[y-1][x-1] == 1 and self.board[y-2][x-2] == 0:
+                                        player_moves.append([(y,x),(y-2,x-2)])
+                                if x <= 3:
+                                    if self.board[y-1][x+1] == 1 and self.board[y-2][x+2] == 0:
+                                        player_moves.append([(y,x),(y-2,x+2)])
+                            if player_moves == []:
+                                for y,x in self.find_all(self.board, 1):                
+                                    if x >= 1:
+                                        if self.board[y-1][x-1] == 0:
+                                            player_moves.append([(y,x),(y-1,x-1)])
+                                    if x <= 4:
+                                        if self.board[y-1][x+1] == 0:
+                                            player_moves.append([(y,x),(y-1,x+1)])
+                                if player_moves == []:
+                                    self.game_is_finished(player_turn= self.player_turn, valid_moves_empty = True)
+                                    return
+                            #####
                             game_gui.playerAlertOrWhatever(self.board)
                             return
                 else:
                     self.player_turn = True
+                    #####
+                    for y,x in self.find_all(self.board, 1):
+                        if self.board[y-1][x] == 0:
+                            player_moves.append([(y,x),(y-1,x)])
+                        if x >= 1:
+                            if self.board[y-1][x-1] == 2:
+                                player_moves.append([(y,x),(y-1,x-1)])
+                        if x <= 4:
+                            if self.board[y-1][x+1] == 2:
+                                player_moves.append([(y,x),(y-1,x+1)])
+                    if player_moves == []:
+                        self.game_is_finished(player_turn= self.player_turn, valid_moves_empty= True)
+                    #####
                     game_gui.playerAlertOrWhatever(self.board)
                     return        
 
