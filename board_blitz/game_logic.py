@@ -1,6 +1,6 @@
 import ai
 import game_gui
-import database
+import sqlite3
 
 class Game_Logic:
 
@@ -195,19 +195,16 @@ class Game_Logic:
         player_moves = []
         for column in self.board[0]:
             if column == 1:
-                print("placeholder, send win bool")
                 game_won = True
+                self.add_leaderboard_entry(game_won)
                 #game_gui.gameover(game_won)
-                # SQL befehl mit daten  
-                #fancy schmancy info to gui that game is over and won, win into database
+                
                 return
         for column in self.board[5]:
             if column == 2:
-                print("placeholder, send loss bool")
                 game_won = False
+                self.add_leaderboard_entry(game_won)
                 #game_gui.gameover(game_won)
-                # SQL befehl mit daten  
-                #fancy schmancy info to gui that game is over and lost, loss into database
                 return
         if self.player_turn:
             if self.game == 0:
@@ -222,10 +219,8 @@ class Game_Logic:
                             player_moves.append([(y,x),(y-1,x+1)])
                 if player_moves == []:
                     game_won = False
-                    print("placeholder, send loss bool")
+                    self.add_leaderboard_entry(game_won)
                     #game_gui.gameover(game_won)
-                    # SQL befehl mit daten  
-                    #fancy schmancy info to gui that game is over and lost, loss into database
                     return
             if self.game == 1:
                 for y,x in self.find_all(self.board, 1):                
@@ -245,22 +240,36 @@ class Game_Logic:
                                 player_moves.append([(y,x),(y-1,x+1)])
                     if player_moves == []:
                         game_won = False
-                        print("placeholder, send loss bool")
+                        self.add_leaderboard_entry(game_won)
                         #game_gui.gameover(game_won)
-                        # SQL befehl mit daten  
-                        #fancy schmancy info to gui that game is over and lost, loss into database
                         return
         if valid_ai_moves_empty:
             game_won = True
-            print("placeholder, send win bool")
             #game_gui.gameover(game_won)
-            # SQL befehl mit daten  
-            #fancy schmancy info to gui that game is over and won, win into database
+            self.add_leaderboard_entry(game_won)
             return
         if game_cancelled:
             game_won = False
-            print("placeholder, send loss bool")
-            #SQL befehl mit daten  
+            self.add_leaderboard_entry(game_won)
             return
 
+    def add_leaderboard_entry(self, game_won):
+        difficulty = self.difficulty
+        if self.game == 0:
+            gamename = "Bauernschach"
+        else:
+            gamename = "Dame"
+        if game_won:
+            score = 1
+        else :
+            score = 0
+        connection = sqlite3.connect('gamesdb.db')
+        cursor = connection.cursor()
+        cursor.execute('SELECT username FROM Login WHERE user_id = ?',(self.user,))
+        data = cursor.fetchone()[0]
+        username = str("%s" % data)
+        cursor.execute('SELECT * FROM scores')
+        cursor.execute('INSERT INTO scores(username, gamename, game_won, difficulty) VALUES (?, ?, ?, ?)', (username, gamename, score, difficulty))
+        connection.commit()
+        connection.close()
 game_logic: Game_Logic = Game_Logic()
