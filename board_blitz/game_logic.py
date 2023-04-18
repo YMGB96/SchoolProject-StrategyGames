@@ -8,6 +8,7 @@ class Game_Logic:
     game: int
     difficulty: int
     board: list[list[int]]
+    consecutive_move = False
 
     def start(self, active_user, active_game, active_difficulty):
         self.player_turn = True
@@ -40,14 +41,13 @@ class Game_Logic:
             
     #checks and returns valid move possibilities, for a single piece for the player, all pieces for the AI
     def get_valid_moves(self, *args, **kwargs):
-
         chosen_piece = kwargs.get('chosen_piece', None)
         player_turn = kwargs.get('player_turn', False)
         if chosen_piece != None:
             posY = chosen_piece[0]
             posX = chosen_piece[1]
         board_preview = self.board
-        if self.game_is_finished():
+        if self.consecutive_move == False:
             return
         else:
             if self.game == 0:     
@@ -74,7 +74,7 @@ class Game_Logic:
                                 moves.append([(y,x),(y+1,x+1)])
                     print(moves)
                     if moves == []:
-                        self.game_is_finished(player_turn: False, valid_moves_empty: True)
+                        self.game_is_finished(player_turn= False, valid_moves_empty= True)
                         return
                     return moves
             elif self.game == 1:
@@ -114,52 +114,70 @@ class Game_Logic:
                                     moves.append([(y,x),(y+1,x+1)])
                         return moves
                     if moves == []:
-                        self.game_is_finished(player_turn: False, valid_moves_empty: True)
+                        self.game_is_finished(player_turn= False, valid_moves_empty= True)
                         return
                     else:
                         return moves
-            
+        
 
 
     def switch_turn(self, move: tuple[tuple[int]]):
         move = move
-        if self.player_turn:
-            self.board[move[0][0]][move[0][1]] = 0
-            self.board[move[1][0]][move[1][1]] = 1
-            if self.game == 1:
-                if move[0][0]+2 == move[1][0]:
-                    beaten_piece_X = (move[0][1] + move[1][1])/2
-                    beaten_piece_Y = (move[0][0] + move[1][0])/2
-                    self.board[beaten_piece_Y][beaten_piece_X] = 0
-                    if move[1][1]>=2 and self.board[move[1][0]-1][move[1][1]-1] == 2 and self.board[move[1][0]-2][move[1][1]-2] == 0:
-                        self.board[move[1][0]-2][move[1][1]-2] = 3
-                        game_gui.playerAlertOrWhatever(self.board) #placeholder for telling the human player that it's still his turn, sending only the next jump as move
-                    elif move[1][1]<=3 and self.board[move[1][0]-1][move[1][1]+1] == 2 and self.board[move[1][0]-2][move[1][1]+2] == 0:
-                        self.board[move[1][0]-2][move[1][1]+2] = 3
-                        game_gui.playerAlertOrWhatever(self.board)  #placeholder for telling the human player that it's still his turn, sending only the next jump as move
-                                                                    #must become impossible to change piece (via gui or restriction in logic?)                
-                    else:
-                        ai.kickoffai #tell ai to go
-            ai.kickoff #tell ai to go
+        if self.game_is_finished():
+            return
         else:
-            self.board[move[0][0]][move[0][1]] = 0
-            self.board[move[1][0]][move[1][1]] = 2
-            if self.game == 1:
-                if move[0][0] -2 == move[1][0]:
-                    moves = []
-                    beaten_piece_X = (move[0][1] + move[1][1])/2
-                    beaten_piece_Y = (move[0][0] + move[1][0])/2
-                    self.board[beaten_piece_Y][beaten_piece_X] = 0
-                    if move[1][1]>=2 and self.board[move[1][0]+1][move[1][1]-1] == 1 and self.board[move[1][0]+2][move[1][1]-2] == 0:
-                        moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]-2)])
-                    if move[1][1]<=3 and self.board[move[1][0]+1][move[1][1]+1] == 1 and self.board[move[1][0]+2][move[1][1]+2] == 0:
-                        moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]+2)])
-                    if moves != []:
-                        #send moves to ai.                
-                    else:
-                        game_gui.playerAlertOrWhatever(self.board)
-
-
+            if self.player_turn:
+                self.board[move[0][0]][move[0][1]] = 0
+                self.board[move[1][0]][move[1][1]] = 1
+                if self.game == 1:
+                    board_preview = self.board
+                    if move[0][0]-2 == move[1][0]:
+                        beaten_piece_X = (move[0][1] + move[1][1])/2
+                        beaten_piece_Y = (move[0][0] + move[1][0])/2
+                        self.board[beaten_piece_Y][beaten_piece_X] = 0
+                        if move[1][1]>=2 and self.board[move[1][0]-1][move[1][1]-1] == 2 and self.board[move[1][0]-2][move[1][1]-2] == 0:
+                            self.consecutive_move = True
+                            board_preview[move[1][0]-2][move[1][1]-2] = 3
+                        if move[1][1]<=3 and self.board[move[1][0]-1][move[1][1]+1] == 2 and self.board[move[1][0]-2][move[1][1]+2] == 0:
+                            self.consecutive_move = True
+                            board_preview[move[1][0]-2][move[1][1]+2] = 3
+                        if any(3 in row for row in self.board) == True:
+                            game_gui.playerAlertOrWhatever(self.board)  #placeholder for telling the human player that it's still his turn, sending only the next jump(s) as move
+                            return
+                        else:
+                            self.player_turn = False
+                            self.consecutive_move = False
+                            ai.kickoffai #tell ai to go
+                            return
+                else: 
+                    self.player_turn = False
+                    self.consecutive_move = False
+                    ai.kickoff #tell ai to go
+                    return
+            else:
+                self.board[move[0][0]][move[0][1]] = 0
+                self.board[move[1][0]][move[1][1]] = 2
+                if self.game == 1:
+                    if move[0][0] +2 == move[1][0]:
+                        moves = []
+                        beaten_piece_X = (move[0][1] + move[1][1])/2
+                        beaten_piece_Y = (move[0][0] + move[1][0])/2
+                        self.board[beaten_piece_Y][beaten_piece_X] = 0
+                        if move[1][1]>=2 and self.board[move[1][0]+1][move[1][1]-1] == 1 and self.board[move[1][0]+2][move[1][1]-2] == 0:
+                            moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]-2)])
+                        if move[1][1]<=3 and self.board[move[1][0]+1][move[1][1]+1] == 1 and self.board[move[1][0]+2][move[1][1]+2] == 0:
+                            moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]+2)])
+                        elif moves != []:
+                            #send moves to ai
+                            return
+                        else:
+                            self.player_turn = True
+                            game_gui.playerAlertOrWhatever(self.board)
+                            return
+                else:
+                    self.player_turn = True
+                    game_gui.playerAlertOrWhatever(self.board)
+                    return        
 
     #checks to see if winning conditions are met
     def game_is_finished(self,*args, **kwargs):
@@ -189,7 +207,7 @@ class Game_Logic:
                 # SQL befehl mit daten  
                 #fancy schmancy info to gui that game is over and lost, loss into database
                 return
-            elif:
+            else:
                 game_won = True
                 #game_gui.gameover(game_won)
                 # SQL befehl mit daten  
