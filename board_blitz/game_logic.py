@@ -16,7 +16,7 @@ class Game_Logic:
         self.user = active_user
         self.game = active_game
         self.difficulty = active_difficulty
-        # testing boards
+        #board info: 0 = empty, 1 = own piece, 2 = opponents piece, 3 = move option to empty field, 4 = move option to opponent field
         if self.game == 0:
             self.board = [[2,2,2,2,2,2],
                           [0,0,0,0,0,0],
@@ -44,23 +44,25 @@ class Game_Logic:
     def get_valid_moves(self, *args, **kwargs):
         chosen_piece = kwargs.get('chosen_piece', None)
         player_turn = kwargs.get('player_turn', False)
-        if chosen_piece != None:
-            posY = chosen_piece[0]
-            posX = chosen_piece[1]
-        board_preview = self.board
+        board_preview = [row.copy() for row in self.board]
         if self.player_turn and self.consecutive_move:
             return
         else:
             if self.game == 0:     
                 if player_turn: #valid moves for single selected piece by player
+                    if chosen_piece != None:
+                        posY = chosen_piece[0]
+                        posX = chosen_piece[1]
+                    else:
+                        return
                     if self.board[posY-1][posX] == 0:
                         board_preview[posY-1][posX] = 3
                     if posX >= 1:
                         if self.board[posY-1][posX-1] == 2:
-                            board_preview[posY-1][posX-1] = 3
+                            board_preview[posY-1][posX-1] = 4
                     if posX <= 4:
                         if self.board[posY-1][posX+1] == 2:
-                            board_preview[posY-1][posX+1] = 3
+                            board_preview[posY-1][posX+1] = 4
                     return board_preview
                 else: #all available valid moves
                     moves = []
@@ -74,11 +76,16 @@ class Game_Logic:
                             if self.board[y+1][x+1] == 1:
                                 moves.append([(y,x),(y+1,x+1)])
                     if moves == []:
-                        self.game_is_finished(player_turn= False, valid_moves_empty= True)
+                        self.game_is_finished(valid_ai_moves_empty= True)
                         return
                     return moves
             elif self.game == 1:
                 if player_turn: #valid moves for single selected piece by player            
+                    if chosen_piece != None:
+                        posY = chosen_piece[0]
+                        posX = chosen_piece[1]
+                    else:
+                        return
                     if posX >= 2:
                         if self.board[posY-1][posX-1] == 2 and self.board[posY-2][posX-2] == 0:
                             board_preview[posY-2][posX-2] = 3
@@ -114,16 +121,15 @@ class Game_Logic:
                                     moves.append([(y,x),(y+1,x+1)])
                         return moves
                     if moves == []:
-                        self.game_is_finished(player_turn= False, valid_moves_empty= True)
+                        self.game_is_finished(valid__ai_moves_empty= True)
                         return
                     else:
                         return moves
         
 
 
-    def switch_turn(self, move: tuple[tuple[int]]):
+    def switch_turn(self, move: tuple[tuple[int, int], tuple[int, int]]):
         move = move
-        player_moves = []
         if self.game_is_finished():
             return
         else:
@@ -133,8 +139,8 @@ class Game_Logic:
                 if self.game == 1:
                     board_preview = self.board
                     if move[0][0]-2 == move[1][0]:
-                        beaten_piece_X = (move[0][1] + move[1][1])/2
-                        beaten_piece_Y = (move[0][0] + move[1][0])/2
+                        beaten_piece_X = (move[0][1] + move[1][1])//2
+                        beaten_piece_Y = (move[0][0] + move[1][0])//2
                         self.board[beaten_piece_Y][beaten_piece_X] = 0
                         if move[1][1]>=2 and self.board[move[1][0]-1][move[1][1]-1] == 2 and self.board[move[1][0]-2][move[1][1]-2] == 0:
                             self.consecutive_move = True
@@ -143,17 +149,17 @@ class Game_Logic:
                             self.consecutive_move = True
                             board_preview[move[1][0]-2][move[1][1]+2] = 3
                         if any(3 in row for row in self.board) == True:
-                            game_gui.playerAlertOrWhatever(board_preview)  #placeholder for telling the human player that it's still his turn, sending only the next jump(s) as move
+                            #game_gui.playerAlertOrWhatever(board_preview)  #placeholder for telling the human player that it's still his turn, sending only the next jump(s) as move
                             return
                         else:
                             self.player_turn = False
                             self.consecutive_move = False
-                            ai.kickoffai #tell ai to go
+                            #ai.kickoffai #tell ai to go
                             return
                 else: 
                     self.player_turn = False
                     self.consecutive_move = False
-                    ai.kickoff #tell ai to go
+                    #ai.kickoff #tell ai to go
                     return
             else:
                 self.board[move[0][0]][move[0][1]] = 0
@@ -161,8 +167,8 @@ class Game_Logic:
                 if self.game == 1:
                     if move[0][0] +2 == move[1][0]:
                         moves = []
-                        beaten_piece_X = (move[0][1] + move[1][1])/2
-                        beaten_piece_Y = (move[0][0] + move[1][0])/2
+                        beaten_piece_X = (move[0][1] + move[1][1])//2
+                        beaten_piece_Y = (move[0][0] + move[1][0])//2
                         self.board[beaten_piece_Y][beaten_piece_X] = 0
                         if move[1][1]>=2 and self.board[move[1][0]+1][move[1][1]-1] == 1 and self.board[move[1][0]+2][move[1][1]-2] == 0:
                             moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]-2)])
@@ -173,51 +179,20 @@ class Game_Logic:
                             return
                         else:
                             self.player_turn = True
-                            #####
-                            for y,x in self.find_all(self.board, 1):                
-                                if x >= 2:
-                                    if self.board[y-1][x-1] == 1 and self.board[y-2][x-2] == 0:
-                                        player_moves.append([(y,x),(y-2,x-2)])
-                                if x <= 3:
-                                    if self.board[y-1][x+1] == 1 and self.board[y-2][x+2] == 0:
-                                        player_moves.append([(y,x),(y-2,x+2)])
-                            if player_moves == []:
-                                for y,x in self.find_all(self.board, 1):                
-                                    if x >= 1:
-                                        if self.board[y-1][x-1] == 0:
-                                            player_moves.append([(y,x),(y-1,x-1)])
-                                    if x <= 4:
-                                        if self.board[y-1][x+1] == 0:
-                                            player_moves.append([(y,x),(y-1,x+1)])
-                                if player_moves == []:
-                                    self.game_is_finished(player_turn= self.player_turn, valid_moves_empty = True)
-                                    return
-                            #####
-                            game_gui.playerAlertOrWhatever(self.board)
+                            self.game_is_finished()
+                            #game_gui.playerAlertOrWhatever(self.board)
                             return
                 else:
                     self.player_turn = True
-                    #####
-                    for y,x in self.find_all(self.board, 1):
-                        if self.board[y-1][x] == 0:
-                            player_moves.append([(y,x),(y-1,x)])
-                        if x >= 1:
-                            if self.board[y-1][x-1] == 2:
-                                player_moves.append([(y,x),(y-1,x-1)])
-                        if x <= 4:
-                            if self.board[y-1][x+1] == 2:
-                                player_moves.append([(y,x),(y-1,x+1)])
-                    if player_moves == []:
-                        self.game_is_finished(player_turn= self.player_turn, valid_moves_empty= True)
-                    #####
-                    game_gui.playerAlertOrWhatever(self.board)
+                    self.game_is_finished()
+                    #game_gui.playerAlertOrWhatever(self.board)
                     return        
 
     #checks to see if winning conditions are met
     def game_is_finished(self,*args, **kwargs):
         game_cancelled = kwargs.get('game_cancelled', False)
-        valid_moves_empty = kwargs.get('valid_moves_empty', False)
-        player_turn = kwargs.get('player_turn', True)
+        valid_ai_moves_empty = kwargs.get('valid_ai_moves_empty', False)
+        player_moves = []
         for column in self.board[0]:
             if column == 1:
                 print("placeholder, send win bool")
@@ -234,24 +209,58 @@ class Game_Logic:
                 # SQL befehl mit daten  
                 #fancy schmancy info to gui that game is over and lost, loss into database
                 return
-        if valid_moves_empty:
-            if player_turn:
-                game_won = False
-                #game_gui.gameover(game_won)
-                # SQL befehl mit daten  
-                #fancy schmancy info to gui that game is over and lost, loss into database
-                return
-            else:
-                game_won = True
-                #game_gui.gameover(game_won)
-                # SQL befehl mit daten  
-                #fancy schmancy info to gui that game is over and won, win into database
-                return
+        if self.player_turn:
+            if self.game == 0:
+                for y,x in self.find_all(self.board, 1):
+                    if self.board[y-1][x] == 0:
+                        player_moves.append([(y,x),(y-1,x)])
+                    if x >= 1:
+                        if self.board[y-1][x-1] == 2:
+                            player_moves.append([(y,x),(y-1,x-1)])
+                    if x <= 4:
+                        if self.board[y-1][x+1] == 2:
+                            player_moves.append([(y,x),(y-1,x+1)])
+                if player_moves == []:
+                    game_won = False
+                    print("placeholder, send loss bool")
+                    #game_gui.gameover(game_won)
+                    # SQL befehl mit daten  
+                    #fancy schmancy info to gui that game is over and lost, loss into database
+                    return
+            if self.game == 1:
+                for y,x in self.find_all(self.board, 1):                
+                    if x >= 2:
+                        if self.board[y-1][x-1] == 1 and self.board[y-2][x-2] == 0:
+                            player_moves.append([(y,x),(y-2,x-2)])
+                    if x <= 3:
+                        if self.board[y-1][x+1] == 1 and self.board[y-2][x+2] == 0:
+                            player_moves.append([(y,x),(y-2,x+2)])
+                if player_moves == []:
+                    for y,x in self.find_all(self.board, 1):                
+                        if x >= 1:
+                            if self.board[y-1][x-1] == 0:
+                                player_moves.append([(y,x),(y-1,x-1)])
+                        if x <= 4:
+                            if self.board[y-1][x+1] == 0:
+                                player_moves.append([(y,x),(y-1,x+1)])
+                    if player_moves == []:
+                        game_won = False
+                        print("placeholder, send loss bool")
+                        #game_gui.gameover(game_won)
+                        # SQL befehl mit daten  
+                        #fancy schmancy info to gui that game is over and lost, loss into database
+                        return
+        if valid_ai_moves_empty:
+            game_won = True
+            print("placeholder, send win bool")
+            #game_gui.gameover(game_won)
+            # SQL befehl mit daten  
+            #fancy schmancy info to gui that game is over and won, win into database
+            return
         if game_cancelled:
             game_won = False
-            #game_gui.gameover(game_won, game_cancelled)
+            print("placeholder, send loss bool")
             #SQL befehl mit daten  
-            #fancy schmancy info to gui that game is over and lost, loss into database
             return
 
 game_logic: Game_Logic = Game_Logic()
