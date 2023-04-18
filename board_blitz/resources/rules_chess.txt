@@ -1,0 +1,24 @@
+*Bauernschach
+ist eine simple Variante des Schachs, die nur mit Bauern gespielt
+wird. In der Ausgangsstellung stehen dabei die weißen bzw. schwarzen
+Spielfiguren (Bauern) auf der jeweiligen Grundlinie. Die Spieler
+machen abwechselnd einen Zug, wobei Weiß beginnt. 
+
+_Es gibt zwei erlaubte Arten von Zügen:
+1)  Ziehen
+    kann ein Bauer, indem er ein Feld in Richtung der gegnerischen
+    Grundlinie (das sind die Felder, auf denen anfangs die
+    gegnerischen Bauern stehen) geht, aber nur sofern dieses Feld
+    frei ist (also nicht von einem eigenen oder gegnerischen Bauern
+    besetzt ist). 
+2)  Schlagen
+    kann ein Bauer in Richtung der gegnerischen Grundlinie durch
+    diagonales Ziehen in Richtung der gegnerischen Grundlinie,
+    aber nur auf einem Feld, auf dem ein gegnerischer Bauer steht. 
+
+Ziel des Spieles ist es, einen Bauern auf die gegnerische
+Grundlinie zu platzieren; wenn das gelingt, ist das Spiel sofort
+zu Ende und die Farbe, die das erreicht hat, hat gewonnen. Wenn
+ein Spieler nicht mehr ziehen kann, oder überhaupt keine Figuren
+mehr hat, ist das Spiel für ihn als verloren zu werten. Ein
+Unentschieden ist daher in dieser Variante nicht möglich.

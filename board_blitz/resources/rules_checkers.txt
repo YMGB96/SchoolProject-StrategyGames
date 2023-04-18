@@ -1,0 +1,23 @@
+*Dame
+wird hier mit vereinfachten Regeln auf einem 6x6 Spielfeld
+gespielt.
+
+Zu Beginn werden für beide Spieler die Spielsteine auf den
+schwarzen Feldern der ersten zwei Reihen des Spielfeldes verteilt.
+Gespielt wird nur auf den dunklen Feldern. Die Steine ziehen jeweils
+ein Feld vorwärts in diagonaler Richtung.
+
+Es herrscht generell Schlagzwang, gegnerische Steine müssen
+entsprechend übersprungen und dadurch geschlagen werden, sofern
+das direkt angrenzende dahinter liegende Feld frei ist. Der
+schlagende Stein wird auf dieses freie Feld gezogen und wenn das
+Zielfeld eines Sprungs auf ein Feld führt, von dem aus ein weiterer
+Stein übersprungen werden kann, wird der Sprung fortgesetzt. Alle
+übersprungenen Steine werden nach dem Zug vom Brett genommen.
+Es darf dabei nicht über eigene Spielsteine gesprungen werden.
+
+Das Spiel ist gewonnen, wenn ein Spieler einen Spielstein auf der
+gegnerischen Grundlinie platzieren kann.
+Das Spiel ist verloren, wenn ein Spieler nicht mehr ziehen kann,
+oder keine Spielsteine mehr hat.
+Ein Unentschieden ist somit in dieser Variante ebenfalls nicht möglich.
