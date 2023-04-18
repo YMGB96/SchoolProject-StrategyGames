@@ -8,7 +8,6 @@ class Game_Logic:
     game: int
     difficulty: int
     board: list[list[int]]
-    #consecutive_turn_count= 0
 
     def start(self, active_user, active_game, active_difficulty):
         self.player_turn = True
@@ -134,15 +133,12 @@ class Game_Logic:
                     self.board[beaten_piece_Y][beaten_piece_X] = 0
                     if move[1][1]>=2 and self.board[move[1][0]-1][move[1][1]-1] == 2 and self.board[move[1][0]-2][move[1][1]-2] == 0:
                         self.board[move[1][0]-2][move[1][1]-2] = 3
-                        #self.consecutive_turn_count +=1
                         game_gui.playerAlertOrWhatever(self.board) #placeholder for telling the human player that it's still his turn, sending only the next jump as move
                     elif move[1][1]<=3 and self.board[move[1][0]-1][move[1][1]+1] == 2 and self.board[move[1][0]-2][move[1][1]+2] == 0:
                         self.board[move[1][0]-2][move[1][1]+2] = 3
-                        #self.consecutive_turn_count +=1
                         game_gui.playerAlertOrWhatever(self.board)  #placeholder for telling the human player that it's still his turn, sending only the next jump as move
                                                                     #must become impossible to change piece (via gui or restriction in logic?)                
                     else:
-                        #self.consecutive_turn_count = 0
                         ai.kickoffai #tell ai to go
             ai.kickoff #tell ai to go
         else:
@@ -161,7 +157,6 @@ class Game_Logic:
                     if moves != []:
                         #send moves to ai.                
                     else:
-                        #self.consecutive_turn_count = 0
                         game_gui.playerAlertOrWhatever(self.board)
 
 
