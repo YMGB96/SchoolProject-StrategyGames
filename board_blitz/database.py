@@ -18,7 +18,7 @@ class Database:
 
 
         sql_table_scores = """
-        CREATE TABLE IF NOT EXISTS scores (        
+        CREATE TABLE IF NOT EXISTS scores (  
             pid INTEGER,
             gamename INTEGER,
             difficulty INTEGER,
@@ -47,8 +47,8 @@ class Database:
         return self.cursor.fetchall()
     
     # SQL command to fetch one user from the login table
-    def get_user(self, username):
-        self.cursor.execute("""SELECT user_id FROM Login WHERE username = ?;""", (username,))
+    def get_user(self, user_id: int):
+        self.cursor.execute("""SELECT username FROM Login WHERE user_id = ?;""", (user_id,))
         return self.cursor.fetchone()
 
     # Function to add user to the login table

@@ -1,198 +1,99 @@
-import game_logic
-import math
+import game_logic as gl
+from random import random
 
-board = [[1,1,1,1,1,1],
-         [0,0,0,0,0,0],
-         [0,0,0,0,0,0],
-         [0,0,0,0,0,0],
-         [0,0,0,0,0,0],
-         [2,2,2,2,2,2]]
+class AI:
+    def __init__(self, game:int, difficulty:int):
+        self.game = game
+        self.difficulty = difficulty
 
-# this function will count the pieces of the ai and player
-def rate_board(board: list[list[int]]) -> int:
-    player_pieces = 0 
-    ai_pieces = 0
-    for row in board: 
-        for piece in row:
-            # if there is a player piece (1) in the row then the count goes up by one
-            if piece == 1:
-                player_pieces += 1
-            # if there is a ai piece (2) in the row then count goes up by one 
-            elif piece == 2:
-                ai_pieces += 1
-    # returns the total number of pieces for both sides            
-    return player_pieces - ai_pieces
-            
-# function to find out what the highest player piece on the board is
-def get_highest_piece(board, player):
-    # currently none of the pieces are higher then the rest 
-    highest_piece = None
-    # checks row after row for a piece 
-    for row in board: 
-        for piece in row:
-            # if it finds a piece it checks if its higher than any other piece
-            if piece == player and (highest_piece is None or piece > highest_piece):
-                # if that piece is higher it changes the "highest Piece" to that new piece
-                highest_piece = piece 
-    return highest_piece
+    def next_move(self, board:list[list[int]], consecutive_moves = None) -> tuple[tuple[int,int],tuple[int,int]]:
+        """Give back the best move the AI thinks it can make"""
+        # Setup variables
+        best_moves = []
+        best_move_value = None
+        # loop through all possible moves
+        moves = consecutive_moves if consecutive_moves else gl.game_logic.get_valid_moves(board)
+        for move in moves:
+            # Get the value of this move recursively
+            new_board = gl.game_logic.preview_move(board, move, False)
+            depth = self.difficulty*2+1
+            value = self.get_board_value(new_board, depth, False)
+            # If this move is better then a previous one - take it
+            if not best_move_value or value > best_move_value:
+                best_move_value = value
+                best_moves = [move]
+            elif value == best_move_value:
+                best_moves.append(move)
+        # return ONE of the best moves
+        if best_moves:
+            return best_moves[int(random()*len(best_moves))]
+        else: return ((-1,-1),(-1,-1))
 
-# same as before only now for ai
-def get_highest_ai_piece(board, ai):
-    highest_piece = None 
-    for row in board: 
-        for piece in row: 
-            if piece == ai and (highest_piece is None or piece > highest_piece):
-                highest_piece = piece 
-    return highest_piece
-
-# funtion checks if the ai piece is alone in a row or not
-def is_ai_alone(board, ai_piece):
-    # checks row after row for piece
-    for row in board:
-        count = 0 
-        for piece in row:
-            # if there is a piece count goes up by one  
-            if piece == ai_piece:
-                count +=1
-        if count == 1:
-            return True
-        return False 
-
-# same as before only now for the player
-def is_player_alone(board, player):
-    for row in board:
-        count = 0
-        for piece in row:
-            if piece == player:
-                count +=1
-        if count == 1:
-            return True 
-    return False
-
-
-##### Dame-Spiel #####
-
-checkers_board = [
-    [0, 2, 0, 2, 0, 2],
-    [2, 0, 2, 0, 2, 0],
-    [0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0],
-    [1, 0, 1, 0, 1, 0],
-    [0, 1, 0, 1, 0, 1],
-]
-
-ai_num = 2
-player_num = 1
-#AI for checkers
-
-#same as the rate_board function
-def rate_checkers_board(checkers_board: list[list[int]]) -> int:
-    player_pieces = 0 
-    ai_pieces = 0
-    for row in board: 
-        for piece in row:
-            if piece == 1:
-                player_pieces += 1
-            elif piece == 2:
-                ai_pieces += 1
-    return player_pieces - ai_pieces
-
-
-# funtion to find the highest ai stone 
-def highest_ai_stone(checkers_board, ai_num):
-    # indices start at 0 so we have a position of (0, 0)
-    highest_row = -1
-    highest_col = -1
-    # loop through the whole board searching for ai stones
-    for row in range(len(checkers_board)):
-        for col in range(len(checkers_board[row])):
-            # if a ai stone is found it compares the row number to the highest_row
-            if checkers_board[row][col] == ai_num:
-                if row > highest_row:
-                    # updates the highest_row and _col with the new position
-                    highest_row = row
-                    highest_col = col
-    # if highest row and highest column still have their values -1 it returns None
-    # to indicate that there are no ai stones on the board 
-    if highest_row == -1 and highest_col == -1:
-        return None
-    # If it found a stone it returns the row and column position of the highest ai stone
-    else:
-        return (highest_row, highest_col)
-
-
-# same as before only for the player
-def highest_player_stone(checkers_board, player_num):
-    highest_row = -1
-    highest_col = -1
-    for row in range(len(checkers_board)):
-        for col in range(len(checkers_board[row])):
-            if checkers_board[row][col] == player_num:
-                if row > highest_row:
-                    highest_row = row
-                    highest_col = col
-    if highest_row == -1 and highest_col == -1:
-        return None
-    else:
-        return (highest_row, highest_col)
+    def get_board_value(self, board:list[list[int]], depth:int, ai_turn:bool) -> int:
+        """Gets the value of the board recursively up to a specified depth"""
+        board_value = 0
+        for move in gl.game_logic.get_valid_moves(board_preview=board):
+            new_board = gl.game_logic.preview_move(board, move, not ai_turn)
+            # If depth is not reached - continue going deeper
+            value = self.get_board_value(new_board, depth-1, not ai_turn) if depth > 0 else 0
+            board_value += value + self.rate_board(new_board)
+        return board_value
     
-
-
-def next_move(board: list[list[int]], difficult: int, *args, **kwargs) ->  tuple[tuple[int,int], tuple[int,int]]:
-    """returns the best possible move according to minimax"""
-    consecutive_moves: list[tuple[tuple[int,int], tuple[int,int]]] = kwargs.get('consecutive_moves', None)
-    # gets the valid moves of the ai
-    if game_logic.game_logic.consecutive_move:
-        ai_moves: list[tuple[tuple[int,int], tuple[int,int]]] = consecutive_moves
-    else:
-        ai_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves()
-    # best_board sets the lowest possible board
-    best_board: int = -999999999
-    # define dummy best_move
-    best_move: tuple[tuple[int,int], tuple[int,int]] = ((0,0),(0,0))
-    # for loop loops trough all moves that are valid for the ai
-    for ai_move in ai_moves:
-        # get board after ai move
-        ai_board: list[list[int]] = game_logic.game_logic.preview_move(board, ai_move, 2)
-        # looks for valid available player move
-        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.player_move_list(ai_board)
-        # for loop loops trough all moves that are valid for the player
-        for player_move in player_moves:
-            # gets board after player move
-            player_board = game_logic.game_logic.preview_move(ai_board, player_move, 1)
-            # rating is result of player board and recursive move (recursive looks at all possible depths)
-            rating = rate_board(player_board) + recursive_move(
-                player_board,
-                # gets valid moves from the player board and depths is difficulty -1
-                game_logic.game_logic.player_move_list(player_board),
-                difficult-1)
-            # if the rating is bigger than best board, the best board will be saved
-            # and the ais move will be set to its current best move
-            if rating > best_board:
-                best_board = rating
-                best_move = ai_move
-    return best_move
-
-
-def recursive_move(board: list[list[int]], moves: list[tuple[tuple[int,int], tuple[int,int]]], depth: int) -> int:
-    """recursive checks all possible depths"""
-    # depth gets set lower
-    depth -= 1
-    # if depth not available return 0
-    if not depth: return 0
-
-    # following code is only changed slightly from previous code
-    best_board: int = -999999999
-    for ai_move in moves:
-        ai_board = game_logic.game_logic.preview_move(board, ai_move, 2)
-        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.player_move_list(ai_board)
-        for player_move in player_moves:
-            player_board = game_logic.game_logic.preview_move(ai_board, player_move, 1)
-            rating = rate_board(player_board) + recursive_move(
-                player_board,
-                game_logic.game_logic.player_move_list(player_board),
-                # instead of difficulty -1 now we use the reduced depth 
-                depth)
-            if rating > best_board:
-                best_board = rating
-    return best_board
+    def rate_board(self, board) -> int:
+        """Determine how good a given board is according to the AI"""
+        # Count pieces of each player
+        ai_pieces = player_pieces = 0
+        for row in board:
+            for piece in row:
+                if piece == 1: player_pieces += 1
+                elif piece == 2: ai_pieces += 1
+        # How far is the furthes own piece
+        ai_highest_piece = player_highest_piece = 0
+        for idx, row in enumerate(board):
+            if 1 in row and player_highest_piece == 0:
+                player_highest_piece = len(board) - idx
+            elif 2 in row:
+                ai_highest_piece = idx
+        # Pawn alone in a collumn
+        ai_sole_pawn = player_sole_pawn = 0
+        if self.game == 0:
+            sole_pawn_list = [0,0,0,0,0,0]
+            for row in board:
+                for col, piece in enumerate(row):
+                    if sole_pawn_list[col] == 0 and piece != 0:
+                        sole_pawn_list[col] = piece
+                    if (sole_pawn_list[col] == 1 and piece == 2 or
+                        sole_pawn_list[col] == 2 and piece == 1):
+                        sole_pawn_list[col] = -1
+            for piece in sole_pawn_list:
+                if piece == 1: player_sole_pawn += 1
+                elif piece == 2: ai_sole_pawn += 1
+        # Checkers diagonal empty spaces
+        ai_diagonal = player_diagonal = 0
+        if self.game == 1:
+            for x, row in enumerate(board):
+                for y, piece in enumerate(row):
+                    if piece == 0: continue
+                    none_diagonal = True
+                    # Go through all diagonal neightbours
+                    for sx, sy in [(x-1, y-1), (x+1, y-1), (x-1, y+1), (x+1, y+1)]:
+                        if (none_diagonal and
+                            0 <= sx < len(board) and
+                            0 <= sy < len(board) and
+                            board[sx][sy] != 0):
+                            none_diagonal = False
+                    if none_diagonal and piece == 1:
+                        player_diagonal += 1
+                    if none_diagonal and piece == 2:
+                        ai_diagonal += 1
+        # return all values but weighted
+        return (
+            ai_pieces * 100 +
+            player_pieces * -130 +
+            ai_highest_piece * 160 +
+            player_highest_piece * -180 +
+            ai_sole_pawn * 120 +
+            player_sole_pawn * -150 +
+            ai_diagonal * -70 +
+            player_diagonal * 80
+        )
