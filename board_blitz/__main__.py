@@ -1,7 +1,8 @@
-from game_gui import game_gui
+import game_gui as gg
 import menu_gui as mg
 from database import database
 import pygame as pg
+import game_logic
 
 run = True
 
@@ -9,6 +10,7 @@ def setup():
     """Set everything up"""
     pg.init()
     mg.menu_gui = mg.MenuGui()
+    game_logic.game_logic.start(1,0,0)
 
 def running():
     """Handle every frame"""
@@ -17,8 +19,8 @@ def running():
         global run
         run = False
     # If there is a game_gui render that ...
-    if game_gui:
-        game_gui.render()
+    if gg.game_gui:
+        gg.game_gui.render()
     # ... render the menu if not
     elif mg.menu_gui:
         mg.menu_gui.render()

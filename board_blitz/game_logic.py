@@ -1,3 +1,4 @@
+from traitlets import Bool
 import ai
 import database
 import game_gui
@@ -32,7 +33,7 @@ class Game_Logic:
                           [0,0,0,0,0,0],
                           [0,1,0,1,0,1],
                           [1,0,1,0,1,0]]
-        game_gui.game_gui = game_gui.GameGui(self.difficulty, self.user)
+        game_gui.game_gui = game_gui.GameGui(self.difficulty, "anon")
         
             
     def find_all(self, matrix, element): #helperfunction for get_valid_moves ai version
@@ -131,11 +132,11 @@ class Game_Logic:
         if self.game_is_finished():
             return
         else:
+            board_preview = [row.copy() for row in self.board]
             if self.player_turn:
                 self.board[move[0][0]][move[0][1]] = 0
                 self.board[move[1][0]][move[1][1]] = 1
                 if self.game == 1:
-                    board_preview = [row.copy() for row in self.board]
                     if move[0][0]-2 == move[1][0]:
                         beaten_piece_X = (move[0][1] + move[1][1])//2
                         beaten_piece_Y = (move[0][0] + move[1][0])//2
@@ -151,12 +152,14 @@ class Game_Logic:
                         else:
                             self.player_turn = False
                             self.consecutive_move = False
-                            ai.preview_move(self.board,self.difficulty)
+                            self.switch_turn(ai.next_move(board_preview,self.difficulty))
+                            self.player_turn = True
                             return
                 else: 
                     self.player_turn = False
                     self.consecutive_move = False
-                    ai.preview_move(self.board,self.difficulty)
+                    self.switch_turn(ai.next_move(board_preview,self.difficulty))
+                    self.player_turn = True
                     return
             else:
                 self.board[move[0][0]][move[0][1]] = 0
@@ -169,86 +172,141 @@ class Game_Logic:
                         self.board[beaten_piece_Y][beaten_piece_X] = 0
                         if move[1][1]>=2 and self.board[move[1][0]+1][move[1][1]-1] == 1 and self.board[move[1][0]+2][move[1][1]-2] == 0:
                             moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]-2)])
+                            self.consecutive_move = True
                         if move[1][1]<=3 and self.board[move[1][0]+1][move[1][1]+1] == 1 and self.board[move[1][0]+2][move[1][1]+2] == 0:
                             moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]+2)])
-                        elif moves != []:
-                            return moves
+                            self.consecutive_move = True
+                        if moves != []:
+                            self.switch_turn(ai.next_move(board_preview,self.difficulty, consecutive_moves = moves))
                         else:
                             self.player_turn = True
+                            self.consecutive_move = False
                             self.game_is_finished()
                             return
                 else:
                     self.player_turn = True
+                    self.consecutive_move = False
                     self.game_is_finished()
                     return        
 
-    def preview_move(self, board:list[list[int]], move:tuple[tuple[int,int], tuple[int,int]]) -> list[list[int]]:
+    def preview_move(self, board:list[list[int]], move:tuple[tuple[int,int], tuple[int,int]], player_moves:int) -> list[list[int]]:
         ai_board = board
         move = move
-
+        if player_moves == 1:
+            ai_board[move[0][0]][move[0][1]] = 0
+            ai_board[move[1][0]][move[1][1]] = 1
+            if self.game == 1 and move[0][0] != move[1][0] -1:
+                ai_board[(move[0][0] + move[1][0])//2][(move[0][1] + move[1][1])//2] = 0
+        else:
+            ai_board[move[0][0]][move[0][1]] = 0
+            ai_board[move[1][0]][move[1][1]] = 2
+            if self.game == 1 and move[0][0] != move[1][0] +1:
+                ai_board[(move[0][0] + move[1][0])//2][(move[0][1] + move[1][1])//2] = 0    
         return ai_board
-    
 
+    def player_move_list(self, board:list[list[int]]) -> list[tuple[tuple[int,int], tuple[int,int]]]:
+        player_moves = []
+        board = board
+        if self.game == 0:
+                for y,x in self.find_all(board, 1):
+                    if board[y-1][x] == 0:
+                        player_moves.append([(y,x),(y-1,x)])
+                    if x >= 1:
+                        if board[y-1][x-1] == 2:
+                            player_moves.append([(y,x),(y-1,x-1)])
+                    if x <= 4:
+                        if board[y-1][x+1] == 2:
+                            player_moves.append([(y,x),(y-1,x+1)])
+        else:
+            for y,x in self.find_all(board, 1):                
+                    if x >= 2:
+                        if board[y-1][x-1] == 1 and board[y-2][x-2] == 0:
+                            player_moves.append([(y,x),(y-2,x-2)])
+                    if x <= 3:
+                        if board[y-1][x+1] == 1 and board[y-2][x+2] == 0:
+                            player_moves.append([(y,x),(y-2,x+2)])
+                    if player_moves == []:
+                        for y,x in self.find_all(board, 1):                
+                            if x >= 1:
+                                if board[y-1][x-1] == 0:
+                                    player_moves.append([(y,x),(y-1,x-1)])
+                            if x <= 4:
+                                if board[y-1][x+1] == 0:
+                                    player_moves.append([(y,x),(y-1,x+1)])
+        return player_moves
+    
     #checks to see if winning conditions are met
     def game_is_finished(self,*args, **kwargs):
         game_cancelled = kwargs.get('game_cancelled', False)
         valid_ai_moves_empty = kwargs.get('valid_ai_moves_empty', False)
-        player_moves = []
         for column in self.board[0]:
             if column == 1:
+                print(1)
                 game_won = True
                 database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                game_gui.GameGui.end_game(game_won)
+                if game_gui.game_gui:
+                    game_gui.game_gui.end_game(game_won)
                 return
         for column in self.board[5]:
             if column == 2:
+                print(2)
                 game_won = False
                 database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                game_gui.GameGui.end_game(game_won)
+                if game_gui.game_gui:
+                    game_gui.game_gui.end_game(game_won)
                 return
         if self.player_turn:
+            moves =[]
             if self.game == 0:
                 for y,x in self.find_all(self.board, 1):
                     if self.board[y-1][x] == 0:
-                        player_moves.append([(y,x),(y-1,x)])
+                        moves.append([(y,x),(y-1,x)])
                     if x >= 1:
                         if self.board[y-1][x-1] == 2:
-                            player_moves.append([(y,x),(y-1,x-1)])
+                            moves.append([(y,x),(y-1,x-1)])
                     if x <= 4:
                         if self.board[y-1][x+1] == 2:
-                            player_moves.append([(y,x),(y-1,x+1)])
-                if player_moves == []:
+                            moves.append([(y,x),(y-1,x+1)])
+                if moves == []:
+                    print(self.board)
+                    print(3)    
                     game_won = False
                     database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                    game_gui.GameGui.end_game(game_won)
+                    if game_gui.game_gui:
+                        game_gui.game_gui.end_game(game_won)
                     return
-            if self.game == 1:
+            else:
                 for y,x in self.find_all(self.board, 1):                
                     if x >= 2:
                         if self.board[y-1][x-1] == 1 and self.board[y-2][x-2] == 0:
-                            player_moves.append([(y,x),(y-2,x-2)])
+                            moves.append([(y,x),(y-2,x-2)])
                     if x <= 3:
                         if self.board[y-1][x+1] == 1 and self.board[y-2][x+2] == 0:
-                            player_moves.append([(y,x),(y-2,x+2)])
-                if player_moves == []:
-                    for y,x in self.find_all(self.board, 1):                
-                        if x >= 1:
-                            if self.board[y-1][x-1] == 0:
-                                player_moves.append([(y,x),(y-1,x-1)])
-                        if x <= 4:
-                            if self.board[y-1][x+1] == 0:
-                                player_moves.append([(y,x),(y-1,x+1)])
-                    if player_moves == []:
-                        game_won = False
-                        database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                        game_gui.GameGui.end_game(game_won)
-                        return
+                            moves.append([(y,x),(y-2,x+2)])
+                    if moves == []:
+                        for y,x in self.find_all(self.board, 1):                
+                            if x >= 1:
+                                if self.board[y-1][x-1] == 0:
+                                    moves.append([(y,x),(y-1,x-1)])
+                            if x <= 4:
+                                if self.board[y-1][x+1] == 0:
+                                    moves.append([(y,x),(y-1,x+1)])
+                if moves == []:
+                    print(4)
+                    game_won = False
+                    database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                    if game_gui.game_gui:
+                        game_gui.game_gui.end_game(game_won)
+                    return
         if valid_ai_moves_empty:
+            print(5)
             game_won = True
-            game_gui.GameGui.end_game(game_won)
+            if game_gui.game_gui:
+                game_gui.game_gui.end_game(game_won)
             database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
             return
         if game_cancelled:
+            print(6)
             game_won = False
             database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
             return

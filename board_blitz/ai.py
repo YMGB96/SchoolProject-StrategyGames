@@ -138,10 +138,14 @@ def highest_player_stone(checkers_board, player_num):
     
 
 
-def preview_move(board: list[list[int]], difficult: int) ->  tuple[tuple[int,int], tuple[int,int]]:
+def next_move(board: list[list[int]], difficult: int, *args, **kwargs) ->  tuple[tuple[int,int], tuple[int,int]]:
     """returns the best possible move according to minimax"""
+    consecutive_moves: list[tuple[tuple[int,int], tuple[int,int]]] = kwargs.get('consecutive_moves', None)
     # gets the valid moves of the ai
-    ai_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves(board, 2)
+    if game_logic.game_logic.consecutive_move:
+        ai_moves: list[tuple[tuple[int,int], tuple[int,int]]] = consecutive_moves
+    else:
+        ai_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves()
     # best_board sets the lowest possible board
     best_board: int = -999999999
     # define dummy best_move
@@ -149,18 +153,18 @@ def preview_move(board: list[list[int]], difficult: int) ->  tuple[tuple[int,int
     # for loop loops trough all moves that are valid for the ai
     for ai_move in ai_moves:
         # get board after ai move
-        ai_board: list[list[int]] = game_logic.game_logic.next_move(board, ai_move)
+        ai_board: list[list[int]] = game_logic.game_logic.preview_move(board, ai_move, 2)
         # looks for valid available player move
-        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves(ai_board, 1)
+        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.player_move_list(ai_board)
         # for loop loops trough all moves that are valid for the player
         for player_move in player_moves:
             # gets board after player move
-            player_board = game_logic.game_logic.next_move(ai_board, player_move)
+            player_board = game_logic.game_logic.preview_move(ai_board, player_move, 1)
             # rating is result of player board and recursive move (recursive looks at all possible depths)
             rating = rate_board(player_board) + recursive_move(
                 player_board,
                 # gets valid moves from the player board and depths is difficulty -1
-                game_logic.game_logic.get_valid_moves(player_board, 2),
+                game_logic.game_logic.player_move_list(player_board),
                 difficult-1)
             # if the rating is bigger than best board, the best board will be saved
             # and the ais move will be set to its current best move
@@ -180,13 +184,13 @@ def recursive_move(board: list[list[int]], moves: list[tuple[tuple[int,int], tup
     # following code is only changed slightly from previous code
     best_board: int = -999999999
     for ai_move in moves:
-        ai_board = game_logic.game_logic.next_move(board, ai_move)
-        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves(ai_board, 1)
+        ai_board = game_logic.game_logic.preview_move(board, ai_move, 2)
+        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.player_move_list(ai_board)
         for player_move in player_moves:
-            player_board = game_logic.game_logic.next_move(ai_board, player_move)
+            player_board = game_logic.game_logic.preview_move(ai_board, player_move, 1)
             rating = rate_board(player_board) + recursive_move(
                 player_board,
-                game_logic.game_logic.get_valid_moves(player_board, 2),
+                game_logic.game_logic.player_move_list(player_board),
                 # instead of difficulty -1 now we use the reduced depth 
                 depth)
             if rating > best_board:
