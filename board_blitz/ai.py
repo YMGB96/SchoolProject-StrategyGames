@@ -16,7 +16,7 @@ class AI:
         for move in moves:
             # Get the value of this move recursively
             new_board = gl.game_logic.preview_move(board, move, False)
-            depth = self.difficulty*2+1
+            depth = self.difficulty*4+1
             value = self.get_board_value(new_board, depth, False)
             # If this move is better then a previous one - take it
             if not best_move_value or value > best_move_value:
@@ -29,14 +29,27 @@ class AI:
             return best_moves[int(random()*len(best_moves))]
         else: return ((-1,-1),(-1,-1))
 
-    def get_board_value(self, board:list[list[int]], depth:int, ai_turn:bool) -> int:
-        """Gets the value of the board recursively up to a specified depth"""
+    def get_board_value(self, board:list[list[int]], depth:int, ai_turn:bool, alpha=float('inf'), beta=float('-inf')) -> int:
+        """Gets the value of the board recursively up to a specified depth using alpha-beta pruning"""
         board_value = 0
         for move in gl.game_logic.get_valid_moves(board_preview=board):
+            # get new board from game logic
             new_board = gl.game_logic.preview_move(board, move, not ai_turn)
-            # If depth is not reached - continue going deeper
-            value = self.get_board_value(new_board, depth-1, not ai_turn) if depth > 0 else 0
-            board_value += value + self.rate_board(new_board)
+            # update alpha and beta
+            if ai_turn:
+                this_value = self.rate_board(new_board)
+                alpha = min(alpha, this_value)
+                if alpha > beta: break
+            else:
+                this_value = -self.rate_board(new_board)
+                beta = min(beta, this_value)
+                if alpha > beta: break
+            # get deeper values
+            next_value = self.get_board_value(new_board, depth-1, not ai_turn, alpha, beta) if depth > 0 else 0
+            new_value = this_value + next_value
+            if ((ai_turn and new_value > board_value) or
+                (not ai_turn and new_value < board_value)):
+                board_value = new_value
         return board_value
     
     def rate_board(self, board) -> int:
