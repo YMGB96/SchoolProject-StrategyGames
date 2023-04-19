@@ -13,8 +13,6 @@ class Error:
 
 class MenuLogic:
     active_user: int = 0
-    active_game: int = 0
-    active_difficulty: int = 0
 
     def register(self, username: str, password: str, repeated_password: str) -> str:
         """Register a new user - returns str on error and None on success"""
@@ -65,12 +63,9 @@ class MenuLogic:
         """Resets the user"""
         self.active_user = 0
 
-    def set_difficulty(self, difficulty): self.active_difficulty = difficulty
-    def set_game(self, game: int): self.active_game = game
-
-    def start_game(self):
+    def start_game(self, game, difficulty):
         """Start the game, this expects difficulty and game to be set"""
-        game_logic.start(self.active_user, self.active_game, self.active_difficulty)
+        game_logic.start(self.active_user, game, difficulty)
 
     def get_leaderboard(self, game_id: int, sort_by: str, reverse: bool) -> list[dict]:
         """Get a sorted leaderboard to be displayed"""

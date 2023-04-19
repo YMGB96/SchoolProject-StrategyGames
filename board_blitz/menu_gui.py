@@ -106,6 +106,7 @@ class MenuGui:
                 'logout': pg.Rect(420, 700, 240, 50),
             },
             'leaderboard': {
+                'place': pg.Rect(60, 210, 95, 50),
                 'username': pg.Rect(155, 210, 330, 50),
                 'easy': pg.Rect(485, 210, 175, 50),
                 'normal': pg.Rect(660, 210, 180, 50),
@@ -409,17 +410,17 @@ class MenuGui:
                 if self.buttons['game_rules']['back'].collidepoint(mouse):
                     self.switch_screen(2) # -> return to after login
                 if self.buttons['game_rules']['easy_bauernschach'].collidepoint(mouse):
-                        ...
+                    menu_logic.start_game(0, 0)
                 if self.buttons['game_rules']['normal_bauernschach'].collidepoint(mouse):
-                         ...
+                    menu_logic.start_game(0, 1)
                 if self.buttons['game_rules']['hard_bauernschach'].collidepoint(mouse):
-                         ...
+                    menu_logic.start_game(0, 2)
                 if self.buttons['game_rules']['easy_dame'].collidepoint(mouse):
-                         ...
+                    menu_logic.start_game(1, 0)
                 if self.buttons['game_rules']['normal_dame'].collidepoint(mouse):
-                         ...
+                    menu_logic.start_game(1, 1)
                 if self.buttons['game_rules']['hard_dame'].collidepoint(mouse):
-                         ...
+                    menu_logic.start_game(1, 2)
         pg.draw.rect(self.screen, (211, 211, 211, 1), self.backgrounds['game_rules']['bauernschach'], border_radius= 15)  
         pg.draw.rect(self.screen, (211, 211, 211, 1), self.backgrounds['game_rules']['dame'], border_radius= 15)
         pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['back'], border_radius=5)

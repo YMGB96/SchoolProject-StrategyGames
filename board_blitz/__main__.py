@@ -2,7 +2,6 @@ import game_gui as gg
 import menu_gui as mg
 from database import database
 import pygame as pg
-import game_logic
 
 run = True
 
