@@ -81,6 +81,8 @@ def bestScore():
             if event.type == pg.MOUSEBUTTONDOWN and back_button.collidepoint(pg.mouse.get_pos()):
                 if event.button == 1: #left mouse button 
                     done = True
+                    
+                    pg.quit()
             if event.type == pg.MOUSEBUTTONDOWN and user_name_field_button.collidepoint(pg.mouse.get_pos()):
                 if event.button == 1: #left mouse button 
                    print("name")

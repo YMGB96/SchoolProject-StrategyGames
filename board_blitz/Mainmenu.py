@@ -2,6 +2,7 @@ import pygame as pg
 from AfterLoginMenu import afterLogin
 from GuestGamer import guestGamer
 from Registration import registration
+from BestScore import bestScore
 pg.init()
 screen_main_menu = pg.display.set_mode((1080, 800))
 pg.display.set_caption("Login")
@@ -128,4 +129,3 @@ def mainMenu():
 if __name__ == '__main__':
     mainMenu()
     pg.quit()
-

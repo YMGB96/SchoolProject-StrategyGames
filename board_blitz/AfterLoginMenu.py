@@ -1,7 +1,7 @@
-
 import pygame as pg
 from math import floor
 from BestScore import bestScore
+pg.init()
 screen = pg.display.set_mode((1080, 800))
 pg.display.set_caption("Login")
 icon = pg.image.load("images/211667_a_controller_game_icon.png")
