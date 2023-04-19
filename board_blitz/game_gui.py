@@ -18,8 +18,8 @@ class GameGui:
         'won': 'GEWONNEN!',
         'lost': 'VERLOREN...',
 
-        'easy': 'Einfache KI',
-        'normal': 'Normale KI',
+        'easy': 'Leichte KI',
+        'normal': 'Mittlere KI',
         'hard': 'Schwere KI',
         'unknown': '???',
         'guest': 'Gast',
@@ -29,6 +29,8 @@ class GameGui:
     is_paused = False
     is_finished = False
     is_won = False
+    checkers = None
+    checkers_move_from = None
     def __init__(self, difficulty: int, playername = None, width = 1125, height = 800):
         if not playername: playername = self.texts['guest']
         # Set up window
@@ -295,35 +297,3 @@ class Sprite:
                 x < mx < x+dx and
                 y < my < y+dy)
 game_gui = None
-
-
-
-
-
-test_board = [[2,2,2,2,2,2],
-              [0,0,0,0,0,0],
-              [0,0,0,0,0,0],
-              [0,0,0,0,0,0],
-              [0,0,0,0,0,0],
-              [1,1,1,1,1,1]]
-
-pg.init()
-pg.font.init()
-game_gui = GameGui(0)
-
-run = True
-while run:
-
-    game_gui.render()
-
-    # drawText("Spielername",font,textColour,30,(screenHeight-30))
-    # drawText("Gegner",font,textColour,(screenWidth-100),30)
-
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            run = False
-    
-    pg.display.update()
-    pg.time.wait(50)
-
-pg.quit()
