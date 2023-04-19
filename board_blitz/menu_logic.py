@@ -77,21 +77,30 @@ class MenuLogic:
         # Get all rated games from the database
         games: list[dict] = database.get_leaderboard(game_id)
         # (username, gamename, difficulty, game_won) ==>> (username, easy, normal, hard)
+        print(games[0]['gamename'])
         users = {}
         for game in games:
             if game['gamename'] != game_id:
                 continue
-            user = users.get(game['username'], {})
+            user = users.get(game['username'])
+            if not user:
+                user = users[game['username']] = {
+                    'username': game['username'],
+                    'easy': '0',
+                    'normal': '0',
+                    'hard': '0',
+                }
+            a = game['game_won'] or -1 # define what to add
             match game['difficulty']:
-                case 0: user['easy'] = user.get('easy', 0) + 1
-                case 1: user['normal'] = user.get('normal', 0) + 1
-                case 2: user['hard'] = user.get('hard', 0) + 1
+                case 0: user['easy'] = str(int(user['easy']) + a)
+                case 1: user['normal'] = str(int(user['normal']) + a)
+                case 2: user['hard'] = str(int(user['hard']) + a)
         # convert dict to list containing only the values
         leaderboard = [entry for _, entry in users.items()]
         # Add name of user with matching id to leaderboard entries
         leaderboard.sort(
             # sort leaderboard by value of the key 'sort_by'
-            key=lambda entry: entry[sort_by],
+            key=lambda entry: entry[sort_by or 'username'],
             reverse=reverse)
         return leaderboard
 
