@@ -1,7 +1,7 @@
 from hashlib import sha256 # https://docs.python.org/3/library/hashlib.html
 from os import urandom
-import database
-import game_logic
+from database import database
+from game_logic import game_logic
 
 class Error:
     UNSET = "Benutzername oder Passwort können nicht leer gelassen werden"
@@ -30,7 +30,7 @@ class MenuLogic:
         user_id: int = 0
         users: list[dict] = database.get_users()
         for user in users:
-            if user.get('name') == username:
+            if user.get('username') == username:
                 return Error.EXISTS
             uid: int = int(user.get('user_id', 0))
             if uid > user_id: user_id = uid
@@ -50,14 +50,14 @@ class MenuLogic:
         try:
             user = next(filter( # https://stackoverflow.com/questions/8534256/find-first-element-in-a-sequence-that-matches-a-predicate
                 lambda user:
-                    user['name'] == username,
+                    user['username'] == username,
                 users))
         except: return Error.NOT_EXIST
         # compare passwords
         salt = bytes.fromhex(user['salt'])
         hashed = sha256(salt + password.encode())
         hashed_password: str = hashed.hexdigest()
-        if user['password'] != hashed_password:
+        if user['hashed_password'] != hashed_password:
             return Error.WRONG
         # set active user if login was successful
         self.active_user = int(user['user_id'])
@@ -74,20 +74,13 @@ class MenuLogic:
         """Start the game, this expects difficulty and game to be set"""
         game_logic.start(self.active_user, self.active_game, self.active_difficulty)
 
-    def get_leaderboard(self, sort_by: str, reverse: bool) -> list[dict]:
+    def get_leaderboard(self, game_id: int, sort_by: str, reverse: bool) -> list[dict]:
         """Get a sorted leaderboard to be displayed"""
-        leaderboard: list[dict] = database.get_leaderboard()
-        users: list[dict] = database.get_users()
+        leaderboard: list[dict] = database.get_leaderboard(game_id)
         # Add name of user with matching id to leaderboard entries
-        for entry in leaderboard:
-            entry["name"] = next(filter(
-                lambda user:
-                    user["user_id"] == entry["user_id"],
-                users
-                ))["name"]
         leaderboard.sort(
             # sort leaderboard by value of the key 'sort_by'
-            key=lambda entry: entry.get(sort_by),
+            key=lambda entry: entry.get(sort_by, ''),
             reverse=reverse)
         return leaderboard
 
