@@ -201,6 +201,7 @@ class GameGui:
             fy += surface.get_size()[1]
 
     def end_game(self, is_won: bool):
+        self.was_pressed = True
         self.is_paused = True
         self.is_finished = True
         self.is_won = is_won
