@@ -21,13 +21,13 @@ class MenuGui:
         self.font = pg.font.Font("./board_blitz/resources/ShipporiAntique.ttf", 25)
         self.font_small = pg.font.Font("./board_blitz/resources/ShipporiAntique.ttf", 20)
         pg.display.set_caption("Board Blitz")
-        icon = pg.image.load("./board_blitz/resources/211667_a_controller_game_icon.png")
+        icon = pg.image.load("./board_blitz/resources/valid_move.png")
         pg.display.set_icon(icon)
         self.texts = {
             'main_menu': {
                 'register': self.font.render("Registrieren", True, self.colors['black']),
                 'guest': self.font.render("Weiter als Gast", True, self.colors['black']),
-                'title': self.font_titel.render("BRETTSPIELE", True, self.colors['black']),
+                'title': self.font_titel.render("BOARD BLITZ", True, self.colors['black']),
                 'or': self.font_small.render("oder", True, self.colors['gray']),
                 'login': self.font.render("Login", True, self.colors['black']),
                 'name_placeholder': self.font.render("Name", True, self.colors['gray']),
@@ -38,7 +38,7 @@ class MenuGui:
             'register': {
                 'register': self.font.render("Registrieren", True, self.colors['black']),
                 'back': self.font.render("Zurück", True, self.colors['black']),
-                'title': self.font_titel.render("BRETTSPIELE", True, self.colors['black']),
+                'title': self.font_titel.render("BOARD BLITZ", True, self.colors['black']),
                 'or': self.font_small.render("oder", True, self.colors['gray']),
                 'name_placeholder': self.font.render("Name", True, self.colors['gray']),
                 'password_placeholder': self.font.render("Passwort", True, self.colors['gray']),
@@ -48,14 +48,14 @@ class MenuGui:
                 'second_password': None,
             },
             'after_login': {
-                'title': self.font_titel.render("BRETTSPIELE", True, self.colors['black']),
+                'title': self.font_titel.render("BOARD BLITZ", True, self.colors['black']),
                 'new_game': self.font.render("Neues Spiel starten", True, self.colors['black']),
                 'leaderboard_chess': self.font.render("Bestenliste Bauernschach", True, self.colors['black']),
                 'leaderboard_checkers': self.font.render("Bestenliste Dame", True, self.colors['black']),
                 'logout': self.font.render("Logout", True, self.colors['black']),
             },
             'leaderboard': {
-                'title': self.font_titel.render("BRETTSPIELE", True, self.colors['black']),
+                'title': self.font_titel.render("BOARD BLITZ", True, self.colors['black']),
                 'place': self.font.render("Platz", True, self.colors['black']),
                 'username': self.font.render("Spielername", True, self.colors['black']),
                 'easy': self.font.render("Leicht", True, self.colors['black']),
