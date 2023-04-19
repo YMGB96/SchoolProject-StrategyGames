@@ -1,7 +1,6 @@
 #import ai
 import database
 import game_gui
-import sqlite3
 
 
 class Game_Logic:
