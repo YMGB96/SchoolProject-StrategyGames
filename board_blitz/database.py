@@ -19,7 +19,7 @@ class Database:
 
         sql_table_scores = """
         CREATE TABLE IF NOT EXISTS scores (        
-            pid INTEGER PRIMARY KEY,
+            pid INTEGER,
             gamename INTEGER,
             difficulty INTEGER,
             game_won INTEGER
