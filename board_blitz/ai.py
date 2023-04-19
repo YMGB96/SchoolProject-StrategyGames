@@ -37,16 +37,14 @@ class AI:
             # get new board from game logic
             new_board = gl.game_logic.preview_move(board, move, not ai_turn)
             # update alpha and beta
+            this_value = self.rate_board(new_board)
             if ai_turn:
-                this_value = self.rate_board(new_board)
                 board_value = max(this_value, board_value)
                 alpha = min(alpha, this_value)
-                if beta >= alpha: break
             else:
-                this_value = self.rate_board(new_board)
                 board_value = min(this_value, board_value)
                 beta = max(beta, this_value)
-                if beta >= alpha: break
+            if beta >= alpha: break
             # get deeper values
             next_value = self.get_board_value(new_board, depth-1, not ai_turn, alpha, beta) if depth > 0 else None
             # correct the board value
