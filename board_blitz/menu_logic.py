@@ -100,7 +100,7 @@ class MenuLogic:
         leaderboard.sort(
             # sort leaderboard by value of the key 'sort_by'
             key=lambda entry: entry[sort_by or 'username'],
-            reverse=reverse)
+            reverse=reverse if sort_by == 'username' else not reverse)
         return leaderboard
 
 menu_logic: MenuLogic = MenuLogic()

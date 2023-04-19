@@ -46,54 +46,60 @@ class Game_Logic:
     def get_valid_moves(self, chosen_piece = None, board_preview = None):
         if not board_preview:
             board_preview = [row.copy() for row in self.board]
-        if self.player_turn and self.consecutive_move:
-            return
-        else:
-            if self.game == 0:
-                if self.player_turn: #valid moves for single selected piece by player
-                    if chosen_piece != None:
-                        posY = chosen_piece[0]
-                        posX = chosen_piece[1]
-                    else:
-                        return
-                    if self.board[posY-1][posX] == 0:
-                        board_preview[posY-1][posX] = 3
-                    if posX >= 1:
-                        if self.board[posY-1][posX-1] == 2:
-                            board_preview[posY-1][posX-1] = 4
-                    if posX <= 4:
-                        if self.board[posY-1][posX+1] == 2:
-                            board_preview[posY-1][posX+1] = 4
-                    return board_preview
-                else: #all available valid moves
-                    moves = []
-                    for y,x in self.find_all(self.board, 2):
-                        if self.board[y+1][x] == 0:
-                            moves.append([(y,x),(y+1,x)])
-                        if x >= 1:
-                            if self.board[y+1][x-1] == 1:
-                                moves.append([(y,x),(y+1,x-1)])
-                        if x <= 4:
-                            if self.board[y+1][x+1] == 1:
-                                moves.append([(y,x),(y+1,x+1)])
-                    if moves == []:
-                        self.game_is_finished(valid_ai_moves_empty= True)
-                        return
-                    return moves
-            elif self.game == 1:
-                if self.player_turn: #valid moves for single selected piece by player            
-                    if chosen_piece != None:
-                        posY = chosen_piece[0]
-                        posX = chosen_piece[1]
-                    else:
-                        return
+        if self.game == 0:
+            if self.player_turn: #valid moves for single selected piece by player
+                if chosen_piece != None:
+                    posY = chosen_piece[0]
+                    posX = chosen_piece[1]
+                else:
+                    return
+                if self.board[posY-1][posX] == 0:
+                    board_preview[posY-1][posX] = 3
+                if posX >= 1:
+                    if self.board[posY-1][posX-1] == 2:
+                        board_preview[posY-1][posX-1] = 4
+                if posX <= 4:
+                    if self.board[posY-1][posX+1] == 2:
+                        board_preview[posY-1][posX+1] = 4
+                return board_preview
+            else: #all available valid moves
+                moves = []
+                for y,x in self.find_all(self.board, 2):
+                    if self.board[y+1][x] == 0:
+                        moves.append([(y,x),(y+1,x)])
+                    if x >= 1:
+                        if self.board[y+1][x-1] == 1:
+                            moves.append([(y,x),(y+1,x-1)])
+                    if x <= 4:
+                        if self.board[y+1][x+1] == 1:
+                            moves.append([(y,x),(y+1,x+1)])
+                if moves == []:
+                    self.game_is_finished(valid_ai_moves_empty= True)
+                    return
+                return moves
+        elif self.game == 1:
+            if self.player_turn and self.consecutive_move == False: #valid moves for single selected piece by player            
+                if chosen_piece != None:
+                    posY = chosen_piece[0]
+                    posX = chosen_piece[1]
+                else:
+                    return
+                unavoidable_moves= []
+                for y,x in self.find_all(self.board, 1):                
+                    if x >= 2:
+                        if self.board[y-1][x-1] == 2 and self.board[y-2][x-2] == 0:
+                            unavoidable_moves.append((y,x))
+                    if x <= 3:
+                        if self.board[y-1][x+1] == 2 and self.board[y-2][x+2] == 0:
+                            unavoidable_moves.append((y,x))
+                if (posY,posX) in unavoidable_moves or unavoidable_moves ==[]:
                     if posX >= 2:
                         if self.board[posY-1][posX-1] == 2 and self.board[posY-2][posX-2] == 0:
                             board_preview[posY-2][posX-2] = 3
                     if posX <= 3:
                         if self.board[posY-1][posX+1] == 2 and self.board[posY-2][posX+2] == 0:
                             board_preview[posY-2][posX+2] = 3
-                    if any(3 in row for row in self.board) == False:
+                    if any(3 in row for row in board_preview) == False:
                         if posX >= 1:
                             if self.board[posY-1][posX-1] == 0:
                                 board_preview[posY-1][posX-1] = 3
@@ -103,27 +109,31 @@ class Game_Logic:
                         return board_preview
                     else:
                         return board_preview
-                else: #all available valid moves
-                    moves = []
+                else:
+                    return self.board    
+            if self.player_turn and self.consecutive_move:
+                return
+            else: #all available valid moves
+                moves = []
+                for y,x in self.find_all(self.board, 2):                
+                    if x >= 2 and y <= 3:
+                        if self.board[y+1][x-1] == 1 and self.board[y+2][x-2] == 0:
+                            moves.append([(y,x),(y+2,x-2)])
+                    if x <= 3 and y <= 3:
+                        if self.board[y+1][x+1] == 1 and self.board[y+2][x+2] == 0:
+                            moves.append([(y,x),(y+2,x+2)])
+                if moves == []:
                     for y,x in self.find_all(self.board, 2):                
-                        if x >= 2 and y <= 3:
-                            if self.board[y+1][x-1] == 1 and self.board[y+2][x-2] == 0:
-                                moves.append([(y,x),(y+2,x-2)])
-                        if x <= 3 and y <= 3:
-                            if self.board[y+1][x+1] == 1 and self.board[y+2][x+2] == 0:
-                                moves.append([(y,x),(y+2,x+2)])
-                    if moves == []:
-                        for y,x in self.find_all(self.board, 2):                
-                            if x >= 1 and y <= 4:
-                                if self.board[y+1][x-1] == 0:
-                                    moves.append([(y,x),(y+1,x-1)])
-                            if x <= 4 and y <= 4:
-                                if self.board[y+1][x+1] == 0:
-                                    moves.append([(y,x),(y+1,x+1)])
-                    if moves == []:
-                        self.game_is_finished(valid__ai_moves_empty= True)
-                        return
-                    return moves
+                        if x >= 1 and y <= 4:
+                            if self.board[y+1][x-1] == 0:
+                                moves.append([(y,x),(y+1,x-1)])
+                        if x <= 4 and y <= 4:
+                            if self.board[y+1][x+1] == 0:
+                                moves.append([(y,x),(y+1,x+1)])
+                if moves == []:
+                    self.game_is_finished(valid__ai_moves_empty= True)
+                    return
+                return moves
         
 
 
@@ -132,15 +142,16 @@ class Game_Logic:
         if self.game_is_finished():
             return
         else:
-            board_preview = [row.copy() for row in self.board]
             if self.player_turn:
                 self.board[move[0][0]][move[0][1]] = 0
                 self.board[move[1][0]][move[1][1]] = 1
+                board_preview = [row.copy() for row in self.board]
                 if self.game == 1:
-                    if move[0][0]-1 == move[1][0]:
+                    if move[0][0]-2 == move[1][0]:
                         beaten_piece_X = (move[0][1] + move[1][1])//2
                         beaten_piece_Y = (move[0][0] + move[1][0])//2
                         self.board[beaten_piece_Y][beaten_piece_X] = 0
+                        board_preview[beaten_piece_Y][beaten_piece_X] = 0
                         if move[1][1]>=2 and self.board[move[1][0]-1][move[1][1]-1] == 2 and self.board[move[1][0]-2][move[1][1]-2] == 0:
                             self.consecutive_move = True
                             board_preview[move[1][0]-2][move[1][1]-2] = 3
@@ -155,7 +166,13 @@ class Game_Logic:
                             self.switch_turn(self.ai.next_move(board_preview))
                             self.player_turn = True
                             return
-                else: 
+                    else:
+                        self.player_turn = False
+                        self.consecutive_move = False
+                        self.switch_turn(self.ai.next_move(board_preview))
+                        self.player_turn = True
+                        return
+                else:
                     self.player_turn = False
                     self.consecutive_move = False
                     self.switch_turn(self.ai.next_move(board_preview))
@@ -164,12 +181,14 @@ class Game_Logic:
             else:
                 self.board[move[0][0]][move[0][1]] = 0
                 self.board[move[1][0]][move[1][1]] = 2
+                board_preview = [row.copy() for row in self.board]
                 if self.game == 1:
-                    if move[0][0] +2 == move[1][0]:
+                    if move[0][0]+2 == move[1][0]:
                         moves = []
                         beaten_piece_X = (move[0][1] + move[1][1])//2
                         beaten_piece_Y = (move[0][0] + move[1][0])//2
                         self.board[beaten_piece_Y][beaten_piece_X] = 0
+                        board_preview[beaten_piece_Y][beaten_piece_X] = 0
                         to_x, to_y = move[1]
                         if (to_y>=2 and to_x <= 3 and
                             self.board[to_x+1][to_y-1] == 1 and
