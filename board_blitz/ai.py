@@ -88,7 +88,7 @@ player_num = 1
 #same as the rate_board function
 def rate_checkers_board(checkers_board: list[list[int]]) -> int:
     player_pieces = 0 
-    ai_peaces = 0
+    ai_pieces = 0
     for row in board: 
         for piece in row:
             if piece == 1:
@@ -137,64 +137,30 @@ def highest_player_stone(checkers_board, player_num):
         return (highest_row, highest_col)
     
 
-# funtion to check if there is a empty spot digonally of a piece for num 1 or 2
-def find_diagonal(checkers_board, num):
-    # empty list for later
-    diagonal_moves = []
-    # checks row after row in a loop 
-    for row in range(len(checkers_board)):
-        # checks column after column in a loop
-        for col in range(len(checkers_board[row])):
-            # if there is a piece at ex. [2][2] it checks where it could move to diagonally
-            if checkers_board[row][col] == num:
-                # checks if it could move to the upper left, upper ight, or lower left, lower right
-                for dr, dc in [(-1,-1),(-1,1),(1,-1),(1,1)]:
-                    # Checks if the diagonal position is inside the chessboard and empty
-                    if 0 <= row+dr < len(checkers_board) and 0 <= col+dc < len(checkers_board[row]) and checkers_board[row+dr][col+dc] == 0:
-                        # If the current player's piece matches the AI's piece
-                        # the move (start and target positions) is added to the diagonal_moves list
-                        if num == ai_num:
-                            diagonal_moves.append((row, col, row+dr, col+dc))
-                            # If the current player's piece does not match the AI's piece
-                            # only the move's target position is added to the diagonal_moves list.
-                        else:
-                            diagonal_moves.append((row+dr, col+dc))
-    return diagonal_moves
 
-# prin the results
-print("free diagonals for AI stones: ")
-print(find_diagonal(checkers_board, ai_num))
-print("free diagonals for player stones: ")
-print(find_diagonal(checkers_board, player_num))
-
-
-
-
-
-
-def next_move(board: list[list[int]], difficult: int) -> tuple[tuple[int]]:
+def preview_move(board: list[list[int]], difficult: int) ->  tuple[tuple[int,int], tuple[int,int]]:
     """returns the best possible move according to minimax"""
     # gets the valid moves of the ai
-    ai_moves: list[tuple[tuple[int]]] = game_logic.get_valid_moves(board, 2)
+    ai_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves(board, 2)
     # best_board sets the lowest possible board
     best_board: int = -999999999
     # define dummy best_move
-    best_move: tuple[tuple[int]] = ((0,0),(0,0))
+    best_move: tuple[tuple[int,int], tuple[int,int]] = ((0,0),(0,0))
     # for loop loops trough all moves that are valid for the ai
     for ai_move in ai_moves:
         # get board after ai move
-        ai_board = game_logic.next_move(board, ai_move)
+        ai_board: list[list[int]] = game_logic.game_logic.next_move(board, ai_move)
         # looks for valid available player move
-        player_moves: list[tuple[tuple[int]]] = game_logic.get_valid_moves(ai_board, 1)
+        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves(ai_board, 1)
         # for loop loops trough all moves that are valid for the player
         for player_move in player_moves:
             # gets board after player move
-            player_board = game_logic.next_move(ai_board, player_move)
+            player_board = game_logic.game_logic.next_move(ai_board, player_move)
             # rating is result of player board and recursive move (recursive looks at all possible depths)
             rating = rate_board(player_board) + recursive_move(
                 player_board,
                 # gets valid moves from the player board and depths is difficulty -1
-                game_logic.get_valid_moves(player_board, 2),
+                game_logic.game_logic.get_valid_moves(player_board, 2),
                 difficult-1)
             # if the rating is bigger than best board, the best board will be saved
             # and the ais move will be set to its current best move
@@ -204,7 +170,7 @@ def next_move(board: list[list[int]], difficult: int) -> tuple[tuple[int]]:
     return best_move
 
 
-def recursive_move(board: list[list[int]], moves: list[tuple[tuple[int]]], depth: int) -> int:
+def recursive_move(board: list[list[int]], moves: list[tuple[tuple[int,int], tuple[int,int]]], depth: int) -> int:
     """recursive checks all possible depths"""
     # depth gets set lower
     depth -= 1
@@ -214,13 +180,13 @@ def recursive_move(board: list[list[int]], moves: list[tuple[tuple[int]]], depth
     # following code is only changed slightly from previous code
     best_board: int = -999999999
     for ai_move in moves:
-        ai_board = game_logic.next_move(board, ai_move)
-        player_moves: list[tuple[tuple[int]]] = game_logic.get_valid_moves(ai_board, 1)
+        ai_board = game_logic.game_logic.next_move(board, ai_move)
+        player_moves: list[tuple[tuple[int,int], tuple[int,int]]] = game_logic.game_logic.get_valid_moves(ai_board, 1)
         for player_move in player_moves:
-            player_board = game_logic.next_move(ai_board, player_move)
+            player_board = game_logic.game_logic.next_move(ai_board, player_move)
             rating = rate_board(player_board) + recursive_move(
                 player_board,
-                game_logic.get_valid_moves(player_board, 2),
+                game_logic.game_logic.get_valid_moves(player_board, 2),
                 # instead of difficulty -1 now we use the reduced depth 
                 depth)
             if rating > best_board:

@@ -1,4 +1,4 @@
-#import ai
+import ai
 import database
 import game_gui
 
@@ -119,12 +119,10 @@ class Game_Logic:
                             if x <= 4:
                                 if self.board[y+1][x+1] == 0:
                                     moves.append([(y,x),(y+1,x+1)])
-                        return moves
                     if moves == []:
                         self.game_is_finished(valid__ai_moves_empty= True)
                         return
-                    else:
-                        return moves
+                    return moves
         
 
 
@@ -153,12 +151,12 @@ class Game_Logic:
                         else:
                             self.player_turn = False
                             self.consecutive_move = False
-                            #ai.kickoffai, tell ai to go with difficulty
+                            ai.preview_move(self.board,self.difficulty)
                             return
                 else: 
                     self.player_turn = False
                     self.consecutive_move = False
-                    #ai.kickoff #tell ai to go
+                    ai.preview_move(self.board,self.difficulty)
                     return
             else:
                 self.board[move[0][0]][move[0][1]] = 0
@@ -184,6 +182,13 @@ class Game_Logic:
                     self.game_is_finished()
                     return        
 
+    def preview_move(self, board:list[list[int]], move:tuple[tuple[int,int], tuple[int,int]]) -> list[list[int]]:
+        ai_board = board
+        move = move
+
+        return ai_board
+    
+
     #checks to see if winning conditions are met
     def game_is_finished(self,*args, **kwargs):
         game_cancelled = kwargs.get('game_cancelled', False)
@@ -193,13 +198,13 @@ class Game_Logic:
             if column == 1:
                 game_won = True
                 database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                game_gui.game_gui.end_game(game_won)
+                game_gui.GameGui.end_game(game_won)
                 return
         for column in self.board[5]:
             if column == 2:
                 game_won = False
                 database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                game_gui.game_gui.end_game(game_won)
+                game_gui.GameGui.end_game(game_won)
                 return
         if self.player_turn:
             if self.game == 0:
@@ -215,7 +220,7 @@ class Game_Logic:
                 if player_moves == []:
                     game_won = False
                     database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                    game_gui.game_gui.end_game(game_won)
+                    game_gui.GameGui.end_game(game_won)
                     return
             if self.game == 1:
                 for y,x in self.find_all(self.board, 1):                
@@ -236,11 +241,11 @@ class Game_Logic:
                     if player_moves == []:
                         game_won = False
                         database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
-                        game_gui.game_gui.end_game(game_won)
+                        game_gui.GameGui.end_game(game_won)
                         return
         if valid_ai_moves_empty:
             game_won = True
-            game_gui.game_gui.end_game(game_won)
+            game_gui.GameGui.end_game(game_won)
             database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
             return
         if game_cancelled:
