@@ -45,6 +45,11 @@ class Database:
     def get_users(self):
         self.cursor.execute("""SELECT user_id, username, hashed_password, salt FROM Login;""")
         return self.cursor.fetchall()
+    
+    # SQL command to fetch one user from the login table
+    def get_user(self, username):
+        self.cursor.execute("""SELECT user_id FROM Login WHERE username = ?;""", (username,))
+        return self.cursor.fetchone()
 
     # Function to add user to the login table
     def add_user(self, user_id, username, password, salt):
