@@ -6,7 +6,6 @@ from game_logic import game_logic
 class Error:
     UNSET = "Benutzername oder Passwort können nicht leer gelassen werden"
     UNMATCH = "Das Passwort gleicht dem wiederholten Passwort nicht"
-    SAVE = "Es konnte nicht gespeichert werden"
     EXISTS = "Der Name ist bereits vergeben"
     NOT_EXIST = "Dieser Nutzer existiert nicht"
     WRONG = "Falsches Passwort"
@@ -30,14 +29,13 @@ class MenuLogic:
         user_id: int = 0
         users: list[dict] = database.get_users()
         for user in users:
-            if user.get('username') == username:
+            if user['username'] == username:
                 return Error.EXISTS
-            uid: int = int(user.get('user_id', 0))
+            uid: int = int(user['user_id'])
             if uid > user_id: user_id = uid
         user_id += 1
-        # save registration to database, return error if it fails
-        if not database.add_user(user_id, username, hashed_password, salt.hex()):
-            return Error.SAVE
+        # save registration to database
+        database.add_user(user_id, username, hashed_password, salt.hex())
         # set active user id and return no error
         self.active_user = user_id
         return ''
@@ -76,11 +74,24 @@ class MenuLogic:
 
     def get_leaderboard(self, game_id: int, sort_by: str, reverse: bool) -> list[dict]:
         """Get a sorted leaderboard to be displayed"""
-        leaderboard: list[dict] = database.get_leaderboard(game_id)
+        # Get all rated games from the database
+        games: list[dict] = database.get_leaderboard(game_id)
+        # (username, gamename, difficulty, game_won) ==>> (username, easy, normal, hard)
+        users = {}
+        for game in games:
+            if game['gamename'] != game_id:
+                continue
+            user = users.get(game['username'], {})
+            match game['difficulty']:
+                case 0: user['easy'] = user.get('easy', 0) + 1
+                case 1: user['normal'] = user.get('normal', 0) + 1
+                case 2: user['hard'] = user.get('hard', 0) + 1
+        # convert dict to list containing only the values
+        leaderboard = [entry for _, entry in users.items()]
         # Add name of user with matching id to leaderboard entries
         leaderboard.sort(
             # sort leaderboard by value of the key 'sort_by'
-            key=lambda entry: entry.get(sort_by, ''),
+            key=lambda entry: entry[sort_by],
             reverse=reverse)
         return leaderboard
 
