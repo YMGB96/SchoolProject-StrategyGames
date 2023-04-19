@@ -13,6 +13,7 @@ class AI:
         best_move_value = None
         # loop through all possible moves
         moves = consecutive_moves if consecutive_moves else gl.game_logic.get_valid_moves(board)
+        if not moves: return ((-1,-1),(-1,-1))
         for move in moves:
             # Get the value of this move recursively
             new_board = gl.game_logic.preview_move(board, move, False)
@@ -38,18 +39,21 @@ class AI:
             # update alpha and beta
             if ai_turn:
                 this_value = self.rate_board(new_board)
+                board_value = max(this_value, board_value)
                 alpha = min(alpha, this_value)
-                if alpha > beta: break
+                if beta >= alpha: break
             else:
-                this_value = -self.rate_board(new_board)
-                beta = min(beta, this_value)
-                if alpha > beta: break
+                this_value = self.rate_board(new_board)
+                board_value = min(this_value, board_value)
+                beta = max(beta, this_value)
+                if beta >= alpha: break
             # get deeper values
-            next_value = self.get_board_value(new_board, depth-1, not ai_turn, alpha, beta) if depth > 0 else 0
-            new_value = this_value + next_value
-            if ((ai_turn and new_value > board_value) or
-                (not ai_turn and new_value < board_value)):
-                board_value = new_value
+            next_value = self.get_board_value(new_board, depth-1, not ai_turn, alpha, beta) if depth > 0 else None
+            # correct the board value
+            if ai_turn and next_value:
+                board_value = max(next_value, board_value)
+            elif next_value:
+                board_value = min(next_value, board_value)
         return board_value
     
     def rate_board(self, board) -> int:
@@ -108,5 +112,4 @@ class AI:
             ai_sole_pawn * 120 +
             player_sole_pawn * -150 +
             ai_diagonal * -70 +
-            player_diagonal * 80
-        )
+            player_diagonal * 80 )
