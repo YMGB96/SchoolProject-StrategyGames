@@ -1,6 +1,5 @@
 #import ai
 import database
-from board_blitz.game_gui import GameGui
 import game_gui
 import sqlite3
 
@@ -9,7 +8,7 @@ class Game_Logic:
 
     player_turn: bool
     user: int
-    user_name = "Anon"
+    user_name: str
     game: int
     difficulty: int
     board: list[list[int]]
@@ -20,7 +19,7 @@ class Game_Logic:
         self.user = active_user
         self.game = active_game
         self.difficulty = active_difficulty
-        #self.user_name = database.getname()
+        self.user_name = database.getname()
         #board info: 0 = empty, 1 = own piece, 2 = opponents piece, 3 = move option to empty field, 4 = move option to opponent field
         if self.game == 0: #pawnchess
             self.board = [[2,2,2,2,2,2],
@@ -157,7 +156,7 @@ class Game_Logic:
                         else:
                             self.player_turn = False
                             self.consecutive_move = False
-                            #ai.kickoffai #tell ai to go with difficulty
+                            #ai.kickoffai, tell ai to go with difficulty
                             return
                 else: 
                     self.player_turn = False
@@ -178,8 +177,7 @@ class Game_Logic:
                         if move[1][1]<=3 and self.board[move[1][0]+1][move[1][1]+1] == 1 and self.board[move[1][0]+2][move[1][1]+2] == 0:
                             moves.append([(move[1][0],move[1][1]),(move[1][0]+2,move[1][1]+2)])
                         elif moves != []:
-                            #send moves to ai
-                            return
+                            return moves
                         else:
                             self.player_turn = True
                             self.game_is_finished()
@@ -197,15 +195,14 @@ class Game_Logic:
         for column in self.board[0]:
             if column == 1:
                 game_won = True
-                self.add_leaderboard_entry(game_won)
-                #game_gui.gameover(game_won)
-                
+                database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                game_gui.game_gui.end_game(game_won)
                 return
         for column in self.board[5]:
             if column == 2:
                 game_won = False
-                self.add_leaderboard_entry(game_won)
-                #game_gui.gameover(game_won)
+                database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                game_gui.game_gui.end_game(game_won)
                 return
         if self.player_turn:
             if self.game == 0:
@@ -220,8 +217,8 @@ class Game_Logic:
                             player_moves.append([(y,x),(y-1,x+1)])
                 if player_moves == []:
                     game_won = False
-                    self.add_leaderboard_entry(game_won)
-                    #game_gui.gameover(game_won)
+                    database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                    game_gui.game_gui.end_game(game_won)
                     return
             if self.game == 1:
                 for y,x in self.find_all(self.board, 1):                
@@ -241,32 +238,17 @@ class Game_Logic:
                                 player_moves.append([(y,x),(y-1,x+1)])
                     if player_moves == []:
                         game_won = False
-                        self.add_leaderboard_entry(game_won)
-                        #game_gui.gameover(game_won)
+                        database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                        game_gui.game_gui.end_game(game_won)
                         return
         if valid_ai_moves_empty:
             game_won = True
-            #game_gui.gameover(game_won)
-            self.add_leaderboard_entry(game_won)
+            game_gui.game_gui.end_game(game_won)
+            database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
             return
         if game_cancelled:
             game_won = False
-            self.add_leaderboard_entry(game_won)
+            database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
             return
 
-    def add_leaderboard_entry(self, game_won):
-        difficulty = self.difficulty
-        if game_won:
-            score = 1
-        else :
-            score = 0
-        connection = sqlite3.connect('gamesdb.db')
-        cursor = connection.cursor()
-        cursor.execute('SELECT username FROM Login WHERE user_id = ?',(self.user,))
-        data = cursor.fetchone()[0]
-        username = str("%s" % data)
-        cursor.execute('SELECT * FROM scores')
-        cursor.execute('INSERT INTO scores(username, gamename, game_won, difficulty) VALUES (?, ?, ?, ?)', (username, self.game, score, difficulty))
-        connection.commit()
-        connection.close()
 game_logic: Game_Logic = Game_Logic()
