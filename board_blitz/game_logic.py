@@ -1,11 +1,15 @@
 #import ai
-#import game_gui
+import database
+from board_blitz.game_gui import GameGui
+import game_gui
 import sqlite3
+
 
 class Game_Logic:
 
     player_turn: bool
     user: int
+    user_name = "Anon"
     game: int
     difficulty: int
     board: list[list[int]]
@@ -16,23 +20,24 @@ class Game_Logic:
         self.user = active_user
         self.game = active_game
         self.difficulty = active_difficulty
+        #self.user_name = database.getname()
         #board info: 0 = empty, 1 = own piece, 2 = opponents piece, 3 = move option to empty field, 4 = move option to opponent field
-        if self.game == 0:
+        if self.game == 0: #pawnchess
             self.board = [[2,2,2,2,2,2],
                           [0,0,0,0,0,0],
                           [0,0,0,0,0,0],
                           [0,0,0,0,0,0],
                           [0,0,0,0,0,0],
                           [1,1,1,1,1,1]]
-        elif self.game == 1:
+        elif self.game == 1: #checkers
             self.board = [[0,2,0,2,0,2],
                           [2,0,2,0,2,0],
                           [0,0,0,0,0,0],
                           [0,0,0,0,0,0],
                           [0,1,0,1,0,1],
                           [1,0,1,0,1,0]]
+        game_gui.game_gui = game_gui.GameGui(self.difficulty, self.user_name)
         
-        #send boardinfo to gui
             
     def find_all(self, matrix, element): #helperfunction for get_valid_moves ai version
         yield from ((row_no, col_no)   #Iterate through all row, column indexes in a 2D Matrix where matrix[row][col] == element
@@ -43,13 +48,12 @@ class Game_Logic:
     #checks and returns valid move possibilities, for a single piece for the player, all pieces for the AI
     def get_valid_moves(self, *args, **kwargs):
         chosen_piece = kwargs.get('chosen_piece', None)
-        player_turn = kwargs.get('player_turn', False)
         board_preview = [row.copy() for row in self.board]
         if self.player_turn and self.consecutive_move:
             return
         else:
             if self.game == 0:     
-                if player_turn: #valid moves for single selected piece by player
+                if self.player_turn: #valid moves for single selected piece by player
                     if chosen_piece != None:
                         posY = chosen_piece[0]
                         posX = chosen_piece[1]
@@ -80,7 +84,7 @@ class Game_Logic:
                         return
                     return moves
             elif self.game == 1:
-                if player_turn: #valid moves for single selected piece by player            
+                if self.player_turn: #valid moves for single selected piece by player            
                     if chosen_piece != None:
                         posY = chosen_piece[0]
                         posX = chosen_piece[1]
@@ -149,12 +153,11 @@ class Game_Logic:
                             self.consecutive_move = True
                             board_preview[move[1][0]-2][move[1][1]+2] = 3
                         if any(3 in row for row in self.board) == True:
-                            #game_gui.playerAlertOrWhatever(board_preview)  #placeholder for telling the human player that it's still his turn, sending only the next jump(s) as move
-                            return
+                            return board_preview
                         else:
                             self.player_turn = False
                             self.consecutive_move = False
-                            #ai.kickoffai #tell ai to go
+                            #ai.kickoffai #tell ai to go with difficulty
                             return
                 else: 
                     self.player_turn = False
@@ -180,12 +183,10 @@ class Game_Logic:
                         else:
                             self.player_turn = True
                             self.game_is_finished()
-                            #game_gui.playerAlertOrWhatever(self.board)
                             return
                 else:
                     self.player_turn = True
                     self.game_is_finished()
-                    #game_gui.playerAlertOrWhatever(self.board)
                     return        
 
     #checks to see if winning conditions are met
@@ -255,10 +256,6 @@ class Game_Logic:
 
     def add_leaderboard_entry(self, game_won):
         difficulty = self.difficulty
-        if self.game == 0:
-            gamename = "Bauernschach"
-        else:
-            gamename = "Dame"
         if game_won:
             score = 1
         else :
@@ -269,7 +266,7 @@ class Game_Logic:
         data = cursor.fetchone()[0]
         username = str("%s" % data)
         cursor.execute('SELECT * FROM scores')
-        cursor.execute('INSERT INTO scores(username, gamename, game_won, difficulty) VALUES (?, ?, ?, ?)', (username, gamename, score, difficulty))
+        cursor.execute('INSERT INTO scores(username, gamename, game_won, difficulty) VALUES (?, ?, ?, ?)', (username, self.game, score, difficulty))
         connection.commit()
         connection.close()
 game_logic: Game_Logic = Game_Logic()
