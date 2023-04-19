@@ -77,7 +77,6 @@ class MenuLogic:
         # Get all rated games from the database
         games: list[dict] = database.get_leaderboard(game_id)
         # (username, gamename, difficulty, game_won) ==>> (username, easy, normal, hard)
-        print(games[0]['gamename'])
         users = {}
         for game in games:
             if game['gamename'] != game_id:
