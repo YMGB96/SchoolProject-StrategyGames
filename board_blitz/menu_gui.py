@@ -1,4 +1,4 @@
-
+from math import floor
 import pygame as pg
 from menu_logic import menu_logic
 
@@ -63,7 +63,16 @@ class MenuGui:
                 'hard': self.font.render("Schwer", True, self.colors['black']),
                 'back': self.font.render("Zurück", True, self.colors['black']),
             },
+            'game_rules': {
+                'bauernschach': self.font_titel.render("BAUERNSCHACH", True, self.colors['black']),
+                'dame': self.font.render("DAME", True, self.colors['black']),
+                'easy': self.font.render("Leicht", True, self.colors['black']),
+                'normal': self.font.render("Mittel", True, self.colors['black']),
+                'hard': self.font.render("Schwer", True, self.colors['black']),
+                'back': self.font.render("Zurück", True, self.colors['black']),
+            },
         }
+           
         self.backgrounds = {
             'main_menu': {
                 'name_password': pg.Rect(270, 230, 540, 350),
@@ -74,6 +83,11 @@ class MenuGui:
             'leaderboard': {
                 'table_header': pg.Rect(60, 210, 965, 50),
             },
+            'game_rules': {
+                'bauernschach': pg.Rect(60, 80, 460, 600),
+                'dame': pg.Rect(560, 80, 460, 600),
+            },
+
         }
         self.buttons = {
             'main_menu': {
@@ -97,7 +111,16 @@ class MenuGui:
                 'normal': pg.Rect(660, 210, 180, 50),
                 'hard': pg.Rect(840, 210, 185, 50),
                 'back': pg.Rect(60, 30, 240, 50),
-            }
+            }, 
+            'game_rules': {
+                'easy_bauernschach': pg.Rect(60, 700, 140, 50),
+                'normal_bauernschach': pg.Rect(220, 700, 140, 50),
+                'hard_bauernschach': pg.Rect(380, 700, 140, 50),
+                'easy_dame': pg.Rect(560, 700, 140, 50),
+                'normal_dame': pg.Rect(720, 700, 140, 50),
+                'hard_dame': pg.Rect(880, 700, 140, 50),
+                'back': pg.Rect(60, 15, 240, 50),
+            },
         }
         self.inputs = {
             'main_menu': {
@@ -108,7 +131,7 @@ class MenuGui:
                 'name': pg.Rect(350, 320, 380, 50),
                 'password': pg.Rect(350, 390, 380, 50),
                 'second_password': pg.Rect(350, 460, 380, 50),
-            }
+            },
         }
 
     def switch_screen(self, screen_id):
@@ -385,9 +408,83 @@ class MenuGui:
             self.screen.blit(normal, (695, 267+i*50, 965, 50))
             self.screen.blit(hard, (875, 267+i*50, 965, 50))
 
-    def draw_game_select(self):
-        ...
+    def draw_game_rules(self):
+        mouse = pg.mouse.get_pos()
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONDOWN and event.button == 1:
+                if self.buttons['game_rules']['back'].collidepoint(mouse):
+                    self.switch_screen(2) # -> return to after login
+                if self.buttons['game_rules']['easy_bauernschach'].collidepoint(mouse):
+                        ...
+                if self.buttons['game_rules']['normal_bauernschach'].collidepoint(mouse):
+                         ...
+                if self.buttons['game_rules']['hard_bauernschach'].collidepoint(mouse):
+                         ...
+                if self.buttons['game_rules']['easy_dame'].collidepoint(mouse):
+                         ...
+                if self.buttons['game_rules']['normal_dame'].collidepoint(mouse):
+                         ...
+                if self.buttons['game_rules']['hard_dame'].collidepoint(mouse):
+                         ...
+        pg.draw.rect(self.screen, (211, 211, 211, 1), self.backgrounds['game_rules']['bauernschach'], border_radius= 15)  
+        pg.draw.rect(self.screen, (211, 211, 211, 1), self.backgrounds['game_rules']['dame'], border_radius= 15)
+        pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['back'], border_radius=5)
+        #Bauernshach
+        pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['easy_bauernschach'], border_radius=5)
+        pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['normal_bauernschach'], border_radius=5)
+        pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['hard_bauernschach'], border_radius=5)
+        #Dame
+        pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['easy_dame'], border_radius=5)
+        pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['normal_dame'], border_radius=5)
+        pg.draw.rect(self.screen, (157, 157, 157), self.buttons['game_rules']['hard_dame'], border_radius=5)
 
+        self.screen.blit(self.texts['game_rules']['back'], (self.buttons['game_rules']['back'].x + self.buttons['game_rules']['back'].w / 2 - self.texts['game_rules']['back'].get_width() / 2, 
+                         self.buttons['game_rules']['back'].y + self.buttons['game_rules']['back'].h / 2 - self.texts['game_rules']['back'].get_height() / 2))
+        self.screen.blit(self.texts['game_rules']['easy'], (self.buttons['game_rules']['easy_bauernschach'].x + self.buttons['game_rules']['easy_bauernschach'].w / 2 - self.texts['game_rules']['easy'].get_width() / 2, 
+                         self.buttons['game_rules']['easy_bauernschach'].y + self.buttons['game_rules']['easy_bauernschach'].h / 2 - self.texts['game_rules']['easy'].get_height() / 2))
+        self.screen.blit(self.texts['game_rules']['normal'], (self.buttons['game_rules']['normal_bauernschach'].x + self.buttons['game_rules']['normal_bauernschach'].w / 2 - self.texts['game_rules']['normal'].get_width() / 2, 
+                         self.buttons['game_rules']['normal_bauernschach'].y + self.buttons['game_rules']['normal_bauernschach'].h / 2 - self.texts['game_rules']['normal'].get_height() / 2))
+        self.screen.blit(self.texts['game_rules']['hard'], (self.buttons['game_rules']['hard_bauernschach'].x + self.buttons['game_rules']['hard_bauernschach'].w / 2 - self.texts['game_rules']['hard'].get_width() / 2, 
+                         self.buttons['game_rules']['hard_bauernschach'].y + self.buttons['game_rules']['hard_bauernschach'].h / 2 - self.texts['game_rules']['hard'].get_height() / 2))
+                #Dame
+        self.screen.blit(self.texts['game_rules']['easy'], (self.buttons['game_rules']['easy_dame'].x + self.buttons['game_rules']['easy_dame'].w / 2 - self.texts['game_rules']['easy'].get_width() / 2, 
+                         self.buttons['game_rules']['easy_dame'].y + self.buttons['game_rules']['easy_dame'].h / 2 - self.texts['game_rules']['easy'].get_height() / 2))
+        self.screen.blit(self.texts['game_rules']['normal'], (self.buttons['game_rules']['normal_dame'].x + self.buttons['game_rules']['normal_dame'].w / 2 - self.texts['game_rules']['normal'].get_width() / 2, 
+                         self.buttons['game_rules']['normal_dame'].y + self.buttons['game_rules']['normal_dame'].h / 2 - self.texts['game_rules']['normal'].get_height() / 2))
+        self.screen.blit(self.texts['game_rules']['hard'], (self.buttons['game_rules']['hard_dame'].x + self.buttons['game_rules']['hard_dame'].w / 2 - self.texts['game_rules']['hard'].get_width() / 2, 
+                         self.buttons['game_rules']['hard_dame'].y + self.buttons['game_rules']['hard_dame'].h / 2 - self.texts['game_rules']['hard'].get_height() / 2))
+        width, height = self.screen.get_size()
+        bolt_font = pg.font.Font('./board_blitz/resources/Staatliches.ttf', floor(width * 0.040))
+        base_font = pg.font.Font('./board_blitz/resources/ShipporiAntique.ttf', floor(width * 0.012))
+        underline_font = pg.font.Font('./board_blitz/resources/ShipporiAntique.ttf', floor(width * 0.012))
+        underline_font.underline = True
+        y = 100
+        x = 40
+        fy = y + floor(height * 0.011)
+        fx = x + floor(width * 0.030)
+        for line in open('./board_blitz/resources/rules_chess.txt', encoding='utf-8'):
+            line = line.rstrip()
+            if not line: line = ' '
+            match line[0]:
+                # budget formatting ^^
+                case '*': surface = bolt_font.render(line[1:], True, (0,0,0))
+                case '_': surface = underline_font.render(line[1:], True, (0,0,0))
+                case _: surface = base_font.render(line, True, (0,0,0))
+            self.screen.blit(surface, (fx,fy))
+            fy += surface.get_size()[1]
+        x = 545
+        fy = y + floor(height * 0.011)
+        fx = x + floor(width * 0.030)
+        for line in open('./board_blitz/resources/rules_checkers.txt', encoding='utf-8'):
+            line = line.rstrip()
+            if not line: line = ' '
+            match line[0]:
+                # budget formatting ^^
+                case '*': surface = bolt_font.render(line[1:], True, (0,0,0))
+                case '_': surface = underline_font.render(line[1:], True, (0,0,0))
+                case _: surface = base_font.render(line, True, (0,0,0))
+            self.screen.blit(surface, (fx,fy))
+            fy += surface.get_size()[1]
     def render(self):
         self.screen.fill(self.colors['white'])
         match self.screen_id:
@@ -395,6 +492,5 @@ class MenuGui:
             case 1: self.draw_register()
             case 2: self.draw_after_login()
             case 3: self.draw_leaderboard()
-            case 4: self.draw_game_select()
-
+            case 4: self.draw_game_rules()
 menu_gui = None

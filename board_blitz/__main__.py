@@ -10,7 +10,6 @@ def setup():
     """Set everything up"""
     pg.init()
     mg.menu_gui = mg.MenuGui()
-    game_logic.game_logic.start(1,0,0)
 
 def running():
     """Handle every frame"""
