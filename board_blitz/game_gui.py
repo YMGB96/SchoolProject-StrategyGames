@@ -1,5 +1,6 @@
 import pygame as pg
 from math import floor
+from game_logic import game_logic
 
 class GameGui:
     colors = {
@@ -116,8 +117,14 @@ class GameGui:
                     last_piece = self.selected_piece
                     self.selected_piece = [(x, y), board[x][y]]
                     if last_piece != self.selected_piece:
-                        # here we know that a new piece was selected and board[x][y] is it's id
-                        board[x][y] = (board[x][y]+ 1) % 5 #! <----- game_logic on 1 -> get valid on 3 -> move (last_piece[0], self.selected_piece[0])
+                        # tell game_logic to make a move, handle result on checkers consecutive moves
+                        if board[x][y] == 3 or board[x][y] == 4:
+                            move_from = (self.checkers_move_from if self.checkers and self.checkers_move_from
+                                         else last_piece[0])
+                            self.checkers = game_logic.switch_turn(((move_from),(x, y)))
+                            self.checkers_move_from = (x,y)
+                        else:
+                            self.checkers = None
 
     def draw_game_finished(self):
         # overlay to darken the game elements
@@ -203,8 +210,9 @@ class GameGui:
         background.fill(self.colors['background'])
         self.window.blit(background, (0,0))
         # draw the current board
-        board = (test_board if self.selected_piece[1] == 1   #! <--- get valid moves from game_logic
-                 else test_board)                            #! <--- get actual board from game_logic
+        board = (self.checkers if self.checkers
+                 else game_logic.get_valid_moves(chosen_piece=self.selected_piece[0]) if self.selected_piece[1] == 1
+                 else game_logic.board)
         self.draw_board(board)
         # draw the names of both parties
         player_captures = enemy_captures = 6
@@ -222,8 +230,11 @@ class GameGui:
         if self.is_finished:
             self.draw_game_finished()
             if not self.was_pressed and pg.mouse.get_pressed()[0]:
+                game_logic.game_is_finished(game_cancelled=True)
                 global run  #! -----> tell menu to do it's thing again
                 run = False #! -----> tell menu to do it's thing again
+                global game_gui
+                game_gui = None
         elif self.is_paused:
             # overlay to darken the game elements
             overlay = pg.Surface(self.window.get_size())
@@ -231,7 +242,7 @@ class GameGui:
             overlay.fill((0,0,0))
             self.window.blit(overlay, (0,0))
             # draw the rules onto the screen
-            game = 1 #! <-------- get current game from game_logic
+            game = game_logic.game
             self.draw_rules(game)
             # render 'paused' buttons
             self.menu_buttons['resume'].draw()
@@ -283,6 +294,10 @@ class Sprite:
                 # mouse is between offset and offset + size
                 x < mx < x+dx and
                 y < my < y+dy)
+game_gui = None
+
+
+
 
 
 test_board = [[2,2,2,2,2,2],
