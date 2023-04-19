@@ -8,7 +8,6 @@ class Game_Logic:
 
     player_turn: bool
     user: int
-    user_name: str
     game: int
     difficulty: int
     board: list[list[int]]
@@ -19,7 +18,6 @@ class Game_Logic:
         self.user = active_user
         self.game = active_game
         self.difficulty = active_difficulty
-        self.user_name = database.getname()
         #board info: 0 = empty, 1 = own piece, 2 = opponents piece, 3 = move option to empty field, 4 = move option to opponent field
         if self.game == 0: #pawnchess
             self.board = [[2,2,2,2,2,2],
@@ -35,7 +33,7 @@ class Game_Logic:
                           [0,0,0,0,0,0],
                           [0,1,0,1,0,1],
                           [1,0,1,0,1,0]]
-        game_gui.game_gui = game_gui.GameGui(self.difficulty, self.user_name)
+        game_gui.game_gui = game_gui.GameGui(self.difficulty, self.user)
         
             
     def find_all(self, matrix, element): #helperfunction for get_valid_moves ai version
@@ -195,13 +193,13 @@ class Game_Logic:
         for column in self.board[0]:
             if column == 1:
                 game_won = True
-                database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
                 game_gui.game_gui.end_game(game_won)
                 return
         for column in self.board[5]:
             if column == 2:
                 game_won = False
-                database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
                 game_gui.game_gui.end_game(game_won)
                 return
         if self.player_turn:
@@ -217,7 +215,7 @@ class Game_Logic:
                             player_moves.append([(y,x),(y-1,x+1)])
                 if player_moves == []:
                     game_won = False
-                    database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                    database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
                     game_gui.game_gui.end_game(game_won)
                     return
             if self.game == 1:
@@ -238,17 +236,17 @@ class Game_Logic:
                                 player_moves.append([(y,x),(y-1,x+1)])
                     if player_moves == []:
                         game_won = False
-                        database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+                        database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
                         game_gui.game_gui.end_game(game_won)
                         return
         if valid_ai_moves_empty:
             game_won = True
             game_gui.game_gui.end_game(game_won)
-            database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+            database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
             return
         if game_cancelled:
             game_won = False
-            database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
+            database.database.add_leaderboard_entry(self.user, self.difficulty, self.game, game_won)
             return
 
 game_logic: Game_Logic = Game_Logic()
