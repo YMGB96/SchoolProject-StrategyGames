@@ -369,7 +369,7 @@ class MenuGui:
                 if self.buttons['leaderboard']['hard'].collidepoint(mouse):
                     self.sort_by = 'hard'
         # Get sorted leaderboard
-        leaderboard = menu_logic.get_leaderboard(self.leaderboard, '', False)
+        leaderboard = menu_logic.get_leaderboard(self.leaderboard, self.sort_by, False)
         # Draw standalone text
         width = self.screen.get_size()[0]
         self.screen.blit(self.texts['leaderboard']['title'], (width//2 - self.texts['register']['title'].get_width()//2, 90))
@@ -378,7 +378,7 @@ class MenuGui:
             pg.draw.rect(self.screen, self.colors['table_row'], [60, 260+100*i, 965, 50])
         # Draw all buttons and their text
         for key, button in self.buttons['leaderboard'].items():
-            pg.draw.rect(self.screen, self.colors['gray'], button, border_radius=5)
+            pg.draw.rect(self.screen, self.colors['gray'], button)
             if text := self.texts['leaderboard'].get(key):
                 self.screen.blit(
                     text,
@@ -389,12 +389,6 @@ class MenuGui:
         pg.draw.line(self.screen,self.colors['black'], (485,210), (485,750))
         pg.draw.line(self.screen,self.colors['black'], (660,210), (660,750))
         pg.draw.line(self.screen,self.colors['black'], (840,210), (840,750))
-        # Draw column names
-        self.screen.blit(self.texts['leaderboard']['place'], (80, 220, 965, 50))
-        self.screen.blit(self.texts['leaderboard']['username'], (180, 220, 965, 50))
-        self.screen.blit(self.texts['leaderboard']['easy'], (515, 220, 965, 50))
-        self.screen.blit(self.texts['leaderboard']['normal'], (695, 220, 965, 50))
-        self.screen.blit(self.texts['leaderboard']['hard'], (870, 220, 965, 50))
         # Draw each row
         for i, row in enumerate(leaderboard):
             place = self.font_small.render(str(i+1), True, self.colors['black'])
