@@ -31,7 +31,9 @@ class Game_Logic:
                           [0,0,0,0,0,0],
                           [0,1,0,1,0,1],
                           [1,0,1,0,1,0]]
-        username = database.database.get_user(self.user)['username']
+        if user := database.database.get_user(self.user):
+            username = user['username']
+        else: username = 'Gast'
         game_gui.game_gui = game_gui.GameGui(self.difficulty, username)
         self.ai = ai.AI(self.game, self.difficulty)
         

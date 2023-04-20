@@ -31,7 +31,7 @@ class GameGui:
     is_won = False
     checkers = None
     checkers_move_from = None
-    def __init__(self, difficulty: int, playername = None, width = 1125, height = 800):
+    def __init__(self, difficulty: int, playername = None, width = 1080, height = 800):
         if not playername: playername = self.texts['guest']
         # Set up window
         self.window = pg.display.set_mode((width,height))
