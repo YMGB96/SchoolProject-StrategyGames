@@ -136,3 +136,46 @@ menu_logic.set_game(1)
 menu_logic.set_difficulty(2)
 menu_logic.start_game()
 ```
+
+## **Game GUI**
+Contains a class that displays the game and handles the user's input
+
+It also contains a sprite class, that is an abstration on a clickable image or text with a background
+
+You can find it [here](board_blitz/game_gui.py)
+
+### **Constructor**
+In it's `__init__` method, most of the object's fields get set, according to the optional `width` and `height` parameters where applicable
+
+It also takes a `difficulty` and a `playername` as arguments so that it can display the correct names
+
+### **Rendering**
+The main module calls this method, it decides what to render and get's all the information needed for that from the game logic
+
+### **Ending the Game**
+Calling this method sets the object's fields, so that the game finished screen is shown
+
+The parameter determines if the game counts as won or lost
+
+### **Other Methods**
+The following methods assist in rendering parts of the game
+
+#### **Drawing the Board**
+This method draws the given board and handles clicks on pieces
+
+The only parameter is the board it will draw
+
+When the mouse started getting pressed on this frame while hovering over any field of the 6x6 grid, the `selected_piece` changes to that field
+
+#### **Overlay on Finished Game**
+Once the game is finished, this method is used to display an overlay, darkening the screen and showing the result
+
+#### **Drawing Names and Captures**
+Names get drawn onto the screen according to the fields set in the constructor
+
+The method also takes in the amount of captures and displays them above/below the names
+
+#### **Drawing Rules**
+Displays the rules according to the provided game type
+
+The Rules are only shows while the game is paused
