@@ -59,6 +59,8 @@ def tearDownClass(cls):
 ## **Menu Logic**
 Contains a class that handles the logic of everything **outside of the game**, from registration and login to the leaderboard
 
+The source can be found [here](board_blitz/menu_logic.py)
+
 ### **How to use**
 To talk to any part of the menu logic, you can import it the variable `menu_logic` of type `MenuLogic` using the following line:
 ```py
@@ -89,6 +91,9 @@ if err:
 else:
     print("No Error has occured")
 ```
+Internally it generates a **random 16 byte salt**, combines it with the **encoded password** and **hashes** the reult
+
+Both salt and the hashed product get **stored in the database** and the user id get's set to this **new user**
 
 ### **Logging in as a User**
 Use the `login` method to check the account's details and set that user as the active one
@@ -103,6 +108,7 @@ if err:
 else:
     print("No Error has occured")
 ```
+Generates the hashed password using the **salt from the database** and **compares the result with the stored result** from the database
 
 ### **Hashing Passwords**
 When registering a user, the `salt` is set to a random sequence of bytes
@@ -124,25 +130,22 @@ menu_logic.logout()
 ```
 
 ### **Get a sorted Leaderboard**
-To get a sorted leaderboard, you can use the `get_leaderboard` method and pass in a field to sort by and if the sorting should be reversed or not
+To get a sorted leaderboard, you can use the `get_leaderboard` method and pass in the game type as an integer, a field to sort by and if the sorting should be reversed or not
 ```py
-sorted_leaderboard: list[dict] = menu_logic.get_leaderboard("name", False)
+sorted_leaderboard: list[dict] = menu_logic.get_leaderboard(0, "username", False)
 ```
 
 ### **Start the Game**
-To start the game, you first need to set the game type using the method `set_game` and the diffuculty using the method `set_difficulty`
-
-Then you can start the game using `start_game`
+To start the game, use `start_game` and pass it the game type and the difficulty as an integer
 ```py
-menu_logic.set_game(1)
-menu_logic.set_difficulty(2)
-menu_logic.start_game()
+menu_logic.start_game(1, 2)
 ```
+This method tells the game logic to **start a new** game with the given **user, game type and difficulty**
 
 ## **Game GUI**
 Contains a class that displays the game and handles the user's input
 
-It also contains a sprite class, that is an abstration on a clickable image or text with a background
+It also contains a sprite class, that is an abstration of a clickable image or text with a background
 
 You can find it [here](board_blitz/game_gui.py)
 
@@ -152,32 +155,41 @@ In it's `__init__` method, most of the object's fields get set, according to the
 It also takes a `difficulty` and a `playername` as arguments so that it can display the correct names
 
 ### **Rendering**
-The main module calls this method, it decides what to render and get's all the information needed for that from the game logic
+The main module calls this method, it **decides what to render** and get's all the information needed for that from the game logic
+
+It uses **helper methods** that are explained below for **most of the rendering** but everything that is not done by said methods, this method does itself
+
+How many **captures** to show per player and what **state** the game is in are also determined by this method
 
 ### **Ending the Game**
-Calling this method sets the object's fields, so that the game finished screen is shown
+Calling this method sets the object's fields, so that the **game finished screen is shown**
 
-The parameter determines if the game counts as won or lost
+The parameter determines if the game counts as **won or lost**
+
+### **Variables of Note**
+Like other modules, the game gui has a global variable that contains a single shared instance of the class, it is initialized as `None`
+
+As soon as this variable is set, the `__main__` will try to call it's render method
 
 ### **Other Methods**
-The following methods assist in rendering parts of the game
+The following methods assist in **rendering parts of the game**
 
 #### **Drawing the Board**
-This method draws the given board and handles clicks on pieces
+This method **draws the given board** and **handles clicks** on pieces
 
-The only parameter is the board it will draw
+The only parameter is the **board** it will draw
 
-When the mouse started getting pressed on this frame while hovering over any field of the 6x6 grid, the `selected_piece` changes to that field
+When the mouse started getting pressed on this frame while hovering over any field of the 6x6 grid, the `selected_piece` **changes to that field**
 
 #### **Overlay on Finished Game**
-Once the game is finished, this method is used to display an overlay, darkening the screen and showing the result
+Once the game is finished, this method is used to **display an overlay**, darkening the screen and **showing the result**
 
 #### **Drawing Names and Captures**
-Names get drawn onto the screen according to the fields set in the constructor
+**Names get drawn** onto the screen according to the fields set in the constructor
 
-The method also takes in the amount of captures and displays them above/below the names
+The method also takes in the **amount of captures** and displays them above/below the names
 
 #### **Drawing Rules**
-Displays the rules according to the provided game type
+**Displays the rules** according to the provided game type
 
-The Rules are only shows while the game is paused
+The Rules are only shows while the **game is paused**
