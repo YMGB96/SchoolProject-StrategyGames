@@ -179,3 +179,16 @@ The method also takes in the amount of captures and displays them above/below th
 Displays the rules according to the provided game type
 
 The Rules are only shows while the game is paused
+
+
+## **Game Logic**
+Contains a class that handles the logic for both games.
+
+### **Variables of Note**
+The logic stores whether it currently is the **users turn**, the **user id**, which **game** is being played, the **board** state and whether or not a player is currently doing **consecutive moves** in checkers in the fields `player_turn` `user` `game` `difficulty` `board` and `consecutive move` respectively.
+
+The logic also stores an **instance** of itself as a **global variable** in the `game_logic` field, to ensure that other modules access the same **instance**.
+
+### **Starting a game**
+Use the `start` method to start a new game. This method requires arguments for which **user** is playing, which **game** is to be played and the chosen **difficulty**
+The method then sets the **board**, fetches the correct **username** from the database and instanciates both the **game gui** and the **ai**, sending the necessary information.
