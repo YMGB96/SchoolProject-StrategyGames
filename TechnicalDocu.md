@@ -75,6 +75,8 @@ In the file `database.py` a database named `'gamesdb.db'` is created to connect 
 
 Following, some methods are defined to `add` entries to the database and to `fetch` contents from it, this methods can be called from other classes in the application.
 
+`connection.row_factory = sqlite3.Row` was added to not only read the queried data as tuples, but to also have the corresponding keys for it.
+
 ### **Registering a User**
 Use the `register` method, to register a user and set them as the active user
 
