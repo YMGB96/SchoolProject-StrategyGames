@@ -72,13 +72,6 @@ To store the active **user**, **game** that is to be played and the ais **diffic
 
 The file also has the **global variable** `menu_logic`, that is an **instance** of the featured `MenuLogic` **class**, so that other modules can easily access the **same instance**
 
-### **Database**
-In the file `database.py` a database named `'gamesdb.db'` is created to connect with the `SQLite3` module, two tables follow to store the login information of the registered users and to store the result values after every game finishes.
-
-Following, some methods are defined to `add` entries to the database and to `fetch` contents from it, this methods can be called from other classes in the application.
-
-`connection.row_factory = sqlite3.Row` was added to not only read the queried data as tuples, but to also have the corresponding keys for it.
-
 ### **Registering a User**
 Use the `register` method, to register a user and set them as the active user
 
@@ -141,6 +134,13 @@ To start the game, use `start_game` and pass it the game type and the difficulty
 menu_logic.start_game(1, 2)
 ```
 This method tells the game logic to **start a new** game with the given **user, game type and difficulty**
+
+## **Database**
+In the file [`database.py`](board_blitz/database.py) a database named '`gamesdb.db`' is created to connect with the `SQLite3` module, two tables follow to store the login information of the registered users and to store the result values after every game finishes.
+
+Following, some methods are defined to `add` entries to the database and to `fetch` contents from it, this methods can be called from other classes in the application.
+
+`connection.row_factory = sqlite3.Row` was added to not only read the queried data as tuples, but to also have the corresponding keys for it.
 
 ## **Game GUI**
 Contains a class that displays the game and handles the user's input
