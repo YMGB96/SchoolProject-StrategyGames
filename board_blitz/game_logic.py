@@ -133,7 +133,7 @@ class Game_Logic:
                             if self.board[y+1][x+1] == 0:
                                 moves.append([(y,x),(y+1,x+1)])
                 if moves == []:
-                    self.game_is_finished(valid__ai_moves_empty= True)
+                    self.game_is_finished(valid_ai_moves_empty= True)
                     return
                 return moves
         

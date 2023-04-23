@@ -193,3 +193,45 @@ The method also takes in the **amount of captures** and displays them above/belo
 **Displays the rules** according to the provided game type
 
 The Rules are only shows while the **game is paused**
+
+
+## **Game Logic**
+Contains a class that handles the logic for both games.
+
+### **Variables of Note**
+The logic stores whether it currently is the **users turn**, the **user id**, which **game** is being played, the **board** state and whether or not a player is currently doing **consecutive moves** in checkers in the fields `player_turn` `user` `game` `difficulty` `board` and `consecutive move` respectively.
+
+The logic also stores an **instance** of itself as a **global variable** in the `game_logic` field, to ensure that other modules access the same **instance**.
+
+### **Starting a game**
+Use the `start` method to start a new game. This method requires arguments for which **user** is playing, which **game** is to be played and the chosen **difficulty**
+The method then sets the **board**, fetches the correct **username** from the database and instanciates both the **game gui** and the **ai**, sending the necessary information.
+
+### **Checking which moves are possible**
+The `get_valid_moves` method is used to check which moves are possible based on the rules of the chosen game. It uses the optional arguments of `chosen_piece`, a single variable in the **board** array, and `board_preview`, a hypothetical state of the **board**. When it is the **player_turn**, it returns a copy of the **board**, setting variables which show where the **chosen_piece** can move to and if it lands on an opponent piece. For checkers, it first checks if there are pieces which can jump over an opponents piece and only if this check returns no result will it check which single move the **chosen_piece** can do. It will return nothing if `consecutive_move` is true, however, to prevent the switching of board pieces.
+For the AI, the method returns the `moves`array, checking for all possible **moves** based on the given **board_preview**. Again, for checkers the method first sees whether there are jumping moves available before considering any non jumping moves.
+Before returning the moves to the AI, the `game_is_finished` method gets called with an argument of `valid_ai_moves_empty`as true, if the `moves`array is empty and the AI is out of moves.
+
+### **Changing the turn**
+The `switch_turn` method is to be called after a move has been made. It calls the `game_is_finished` method to see if the game is done, then it changes the variables of the **board** based on the given `move`argument, which is expected to be a tuple of two **board** positions, the first being the one where the moved piece came from, the other where it landed.
+Based on the `player_turn` Bool, it either recursively calls itself again, this time with an argument calling the method which starts the **AI**, which gets a **board_preview** as an argument, or it returns nothing, allowing the Player to make their next move.
+In case checkers is being played, the method also checks whether a `consecutive_move`is being made where a player may move again after beating an opponents piece, in which case it returns a new **board_preview** for the **Game Gui**, only setting the possible moves of the one valid piece, or it recursively calls itself again, this time immediatly giving a `consecutive_moves`argument to the **AI** method, an array of the only valid moves.
+After every turn the **AI** makes, `game_is_finished` gets called.
+
+### **Creating hypothetical board states**
+The method `preview_move` exists to return a hypothetical **board**, called `ai_board`, based on a given `board`, `move` and whether it is a `player_move`or not, to the **AI** while its algorythm checks for the best possible outcome.
+
+### **Checking for hypothetical player moves**
+The method `player_move_list` returns an array of all possible **moves** the player could make, called `player_moves`, using a given `board`, so that the **AI**s algorythm can make use of them.
+
+### **Checking if a game has ended**
+The `game_is_finished` method is responsible for checking whether a game has ended or not, if the player has won and sending that information to the **Database**, along with the **user id**, **difficulty** and which **game** was played.
+It accepts the optional arguments of `game_cancelled` and `valid_ai_moves_empty`.
+
+It checks the following possibilities:
+
+    - The player moved a piece to the opponents row, the player has won
+    - The opponent moved a piece to the players row, the player has lost
+    - The player is out of moves, the player has lost
+    - `valid_ai_moves_empty` is true, the AI has no available moves, the player has won
+    - `game_cancelled` is true, the player has forfeit, the player has lost
