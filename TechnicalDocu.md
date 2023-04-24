@@ -155,12 +155,12 @@ In this case, by default, the number  ```screen_id() = 0 ```, which corresponds 
 
 The function will be used for rendering: 
        ```self.font.render()
-set the text, color, and antialias values.
-          self.screen.blit() 
-draw the text
-         pg.Rect() 
-sets the position of the backgrounds in the menu.
-         pg.draw.rect() 
+set the text, color, and antialias values.```
+         ```self.screen.blit()
+draw the text```
+        ``` pg.Rect() 
+sets the position of the backgrounds in the menu.   ```
+           ``` pg.draw.rect() 
 draw the buttons and backgrounds```
        
 ### **Navigate through the menu buttons **
