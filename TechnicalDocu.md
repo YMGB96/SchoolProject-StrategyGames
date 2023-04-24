@@ -163,7 +163,7 @@ sets the position of the backgrounds in the menu.
          ```pg.draw.rect() ```
 draw the buttons and backgrounds
        
-### **Тavigate through the menu buttons **
+### **Navigate through the menu buttons **
 
  ```if event.type == pg.MOUSEBUTTONDOWN and event.button == 1: ```
 
