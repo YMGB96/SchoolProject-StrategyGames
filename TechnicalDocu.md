@@ -142,6 +142,33 @@ Following, some methods are defined to `add` entries to the database and to `fet
 
 `connection.row_factory = sqlite3.Row` was added to not only read the queried data as tuples, but to also have the corresponding keys for it.
 
+## **Menu GUI**
+Contains a class that displays the user menu and take the user's input
+
+### **Constructor**
+After running the  ```menu_gui.render() ``` function, the def  ```_init_ ```, will initialize the attributes and save all the necessary elements for the GUI. The MenuGui.class includes all the tools for designing all GUI pages and methods for each page that render its elements and are responsible for their functioning, for example,  ```draw_main_menu() ```.
+
+### **Rendering**
+Using the  ```menu_gui.render() ``` function, depending on the  ```screen_id() ``` number,
+to which the corresponding menu window is assigned, it displays it.
+In this case, by default, the number  ```screen_id() = 0 ```, which corresponds to the main menu, further actions of the player in the menu by pressing the corresponding buttons will change its number and menu windows accordingly.
+
+The function will be used for rendering: 
+         ```self.font.render() ```
+set the text, color, and antialias values.
+          ```self.screen.blit() ```
+draw the text
+         ```pg.Rect() ```
+sets the position of the backgrounds in the menu.
+         ```pg.draw.rect() ```
+draw the buttons and backgrounds
+       
+### **Тavigate through the menu buttons **
+
+ ```if event.type == pg.MOUSEBUTTONDOWN and event.button == 1: ```
+
+If the user clicks on the button with the left mouse button, the menu will be navigated depending on its function.
+
 ## **Game GUI**
 Contains a class that displays the game and handles the user's input
 
