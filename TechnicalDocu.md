@@ -153,15 +153,15 @@ Using the  ```menu_gui.render() ``` function, depending on the  ```screen_id() `
 to which the corresponding menu window is assigned, it displays it.
 In this case, by default, the number  ```screen_id() = 0 ```, which corresponds to the main menu, further actions of the player in the menu by pressing the corresponding buttons will change its number and menu windows accordingly.
 
-The function will be used for rendering: 
-         ```self.font.render() ```
+```The function will be used for rendering: 
+       self.font.render()
 set the text, color, and antialias values.
-          ```self.screen.blit() ```
+          self.screen.blit() 
 draw the text
-         ```pg.Rect() ```
+         pg.Rect() 
 sets the position of the backgrounds in the menu.
-         ```pg.draw.rect() ```
-draw the buttons and backgrounds
+         pg.draw.rect() 
+draw the buttons and backgrounds```
        
 ### **Navigate through the menu buttons **
 
