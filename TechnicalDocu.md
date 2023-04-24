@@ -159,7 +159,7 @@ set the text, color, and antialias values.<br />
         ```self.screen.blit()```<br />
 draw the text<br />
         ```pg.Rect()```<br />
-set the position of the backgrounds in the menu.<br />
+set the position of the buttons and backgrounds in the menu.<br />
         ```pg.draw.rect()```<br />
 draw the buttons and backgrounds<br />
        
