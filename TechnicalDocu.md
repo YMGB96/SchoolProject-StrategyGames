@@ -262,3 +262,37 @@ It checks the following possibilities:
     - The player is out of moves, the player has lost
     - `valid_ai_moves_empty` is true, the AI has no available moves, the player has won
     - `game_cancelled` is true, the player has forfeit, the player has lost
+
+### **AI**
+Technical details like how the AI works and what it can and can’t do will be explained in this Technical Documentation.
+
+### **First Step**
+First, we need to define a class called "AI" that takes in two parameters, `game` and `difficulty` when initialized.
+The `game` parameter specifies the type of game that the AI will be playing. The `difficulty` parameter sets the level of challenge that the AI will face when playing the game.
+Also, we need to `import game_logic as gl` at the beginning of the code it imports the `game_logic` module (containing the game logic for the specific game being played) and aliases it as `gl`.
+Then the AI still needs the `random` module from the Python standard library, which is used to generate random numbers.
+Overall, this code sets up the basic framework for an AI that will play a specific game at a certain difficulty level and imports the necessary modules for the AI's functionality.
+
+### **The AI’s best possible move**
+To determine the best possible move, the AI utilizes a `next_move` function. Prior to execution, two variables need to be set: `best_moves` (initialized as an empty list) and `best_moves_value` (initialized as "None"). The AI will then iterate through all possible moves and if it finds a move that is superior to the previous best move, it will replace it with the new move.
+
+## **AI Difficulty with Alpha-beta pruning** 
+First the AI will need the `get_board_value` that calculates the value of a given game board recursively up to a specified depth, using alpha-beta pruning.
+
+The function takes four parameters:
+`board`: a list of lists representing the game board
+`depth`: an integer specifying how deep the recursion should go
+`ai_turn`: a Boolean indicating whether it is the AI's turn to make a move
+`alpha` and "beta": two optional arguments that set the initial alpha and beta values for the alpha-beta pruning algorithm.
+The function first initializes a `board_value` variable to 0. It then iterates through all valid moves that can be made on the current board using the `get_valid_moves` function from the `game_logic` module. For each valid move, the function creates a new board by using the `preview_move` function from the `game_logic` module.
+It then evaluates the current board using the `rate_board` function (which assigns a score to the board based on various factors like piece positions and control of the board). The function then updates the `board_value` variable based on whether it is the AI's turn or not, and updates the alpha and beta values accordingly for the alpha-beta pruning algorithm.
+If the beta value is greater than or equal to the alpha value (meaning that the current subtree does not need to be explored further), the function breaks out of the loop. Otherwise, it calls itself recursively with the new board and updates the "board_value" variable again based on whether it is the AI's turn or not.
+The function returns the final "board_value" after all valid moves have been explored up to the specified depth.
+
+## **Rating the board**
+Firstly, the AI, counts the number of pieces each player has on the board. Then, it calculates how far the furthest pawn of each player is from their own side of the board. Additionally, it checks whether there are any pawns that are alone in a column for each player. Finally, for the Checkers Game it checks whether any pawns have empty diagonal spaces around them.
+Each of these factors is weighted differently in the score calculation.
+The final score is then returned as a single integer value.
+
+
+ 
