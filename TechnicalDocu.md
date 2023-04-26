@@ -135,39 +135,46 @@ menu_logic.start_game(1, 2)
 ```
 This method tells the game logic to **start a new** game with the given **user, game type and difficulty**
 
-## **Database**
-In the file [`database.py`](board_blitz/database.py) a database named '`gamesdb.db`' is created to connect with the `SQLite3` module, two tables follow to store the login information of the registered users and to store the result values after every game finishes.
+## **Game Logic**
+Contains a class that handles the logic for both games.
 
-Following, some methods are defined to `add` entries to the database and to `fetch` contents from it, this methods can be called from other classes in the application.
+### **Variables of Note**
+The logic stores whether it currently is the **users turn**, the **user id**, which **game** is being played, the **board** state and whether or not a player is currently doing **consecutive moves** in checkers in the fields `player_turn` `user` `game` `difficulty` `board` and `consecutive move` respectively.
 
-`connection.row_factory = sqlite3.Row` was added to not only read the queried data as tuples, but to also have the corresponding keys for it.
+The logic also stores an **instance** of itself as a **global variable** in the `game_logic` field, to ensure that other modules access the same **instance**.
 
-## **Menu GUI**
-Contains a class that displays the user menu and take the user's input
+### **Starting a game**
+Use the `start` method to start a new game. This method requires arguments for which **user** is playing, which **game** is to be played and the chosen **difficulty**
+The method then sets the **board**, fetches the correct **username** from the database and instanciates both the **game gui** and the **ai**, sending the necessary information.
 
-### **Constructor**
-After running the  ```menu_gui.render() ``` function, the def  ```_init_ ```, will initialize the attributes and save all the necessary elements for the GUI. The MenuGui.class includes all the tools for designing all GUI pages and methods for each page that render its elements and are responsible for their functioning, for example,  ```draw_main_menu() ```.
+### **Checking which moves are possible**
+The `get_valid_moves` method is used to check which moves are possible based on the rules of the chosen game. It uses the optional arguments of `chosen_piece`, a single variable in the **board** array, and `board_preview`, a hypothetical state of the **board**. When it is the **player_turn**, it returns a copy of the **board**, setting variables which show where the **chosen_piece** can move to and if it lands on an opponent piece. For checkers, it first checks if there are pieces which can jump over an opponents piece and only if this check returns no result will it check which single move the **chosen_piece** can do. It will return nothing if `consecutive_move` is true, however, to prevent the switching of board pieces.
+For the AI, the method returns the `moves`array, checking for all possible **moves** based on the given **board_preview**. Again, for checkers the method first sees whether there are jumping moves available before considering any non jumping moves.
+Before returning the moves to the AI, the `game_is_finished` method gets called with an argument of `valid_ai_moves_empty`as true, if the `moves`array is empty and the AI is out of moves.
 
-### **Rendering**
-Using the  ```menu_gui.render() ``` function, depending on the  ```screen_id() ``` number,
-to which the corresponding menu window is assigned, it displays it.
-In this case, by default, the number  ```screen_id() = 0 ```, which corresponds to the main menu, further actions of the player in the menu by pressing the corresponding buttons will change its number and menu windows accordingly.
+### **Changing the turn**
+The `switch_turn` method is to be called after a move has been made. It calls the `game_is_finished` method to see if the game is done, then it changes the variables of the **board** based on the given `move`argument, which is expected to be a tuple of two **board** positions, the first being the one where the moved piece came from, the other where it landed.
+Based on the `player_turn` Bool, it either recursively calls itself again, this time with an argument calling the method which starts the **AI**, which gets a **board_preview** as an argument, or it returns nothing, allowing the Player to make their next move.
+In case checkers is being played, the method also checks whether a `consecutive_move`is being made where a player may move again after beating an opponents piece, in which case it returns a new **board_preview** for the **Game Gui**, only setting the possible moves of the one valid piece, or it recursively calls itself again, this time immediatly giving a `consecutive_moves`argument to the **AI** method, an array of the only valid moves.
+After every turn the **AI** makes, `game_is_finished` gets called.
 
-The function will be used for rendering:<br />
-       ```self.font.render()```<br />
-set the text, color, and antialias values.<br />
-        ```self.screen.blit()```<br />
-draw the text<br />
-        ```pg.Rect()```<br />
-set the position of the buttons and backgrounds in the menu.<br />
-        ```pg.draw.rect()```<br />
-draw the buttons and backgrounds<br />
-       
-### **Navigate through the menu buttons **
+### **Creating hypothetical board states**
+The method `preview_move` exists to return a hypothetical **board**, called `ai_board`, based on a given `board`, `move` and whether it is a `player_move`or not, to the **AI** while its algorythm checks for the best possible outcome.
 
- ```if event.type == pg.MOUSEBUTTONDOWN and event.button == 1: ```
+### **Checking for hypothetical player moves**
+The method `player_move_list` returns an array of all possible **moves** the player could make, called `player_moves`, using a given `board`, so that the **AI**s algorythm can make use of them.
 
-If the user clicks on the button with the left mouse button, the menu will be navigated depending on its function.
+### **Checking if a game has ended**
+The `game_is_finished` method is responsible for checking whether a game has ended or not, if the player has won and sending that information to the **Database**, along with the **user id**, **difficulty** and which **game** was played.
+It accepts the optional arguments of `game_cancelled` and `valid_ai_moves_empty`.
+
+It checks the following possibilities:
+
+    - The player moved a piece to the opponents row, the player has won
+    - The opponent moved a piece to the players row, the player has lost
+    - The player is out of moves, the player has lost
+    - `valid_ai_moves_empty` is true, the AI has no available moves, the player has won
+    - `game_cancelled` is true, the player has forfeit, the player has lost
 
 ## **Game GUI**
 Contains a class that displays the game and handles the user's input
@@ -221,49 +228,41 @@ The method also takes in the **amount of captures** and displays them above/belo
 
 The Rules are only shows while the **game is paused**
 
+## **Menu GUI**
+Contains a class that displays the user menu and take the user's input
 
-## **Game Logic**
-Contains a class that handles the logic for both games.
+### **Constructor**
+After running the  ```menu_gui.render() ``` function, the def  ```_init_ ```, will initialize the attributes and save all the necessary elements for the GUI. The MenuGui.class includes all the tools for designing all GUI pages and methods for each page that render its elements and are responsible for their functioning, for example,  ```draw_main_menu() ```.
 
-### **Variables of Note**
-The logic stores whether it currently is the **users turn**, the **user id**, which **game** is being played, the **board** state and whether or not a player is currently doing **consecutive moves** in checkers in the fields `player_turn` `user` `game` `difficulty` `board` and `consecutive move` respectively.
+### **Rendering**
+Using the  ```menu_gui.render() ``` function, depending on the  ```screen_id() ``` number,
+to which the corresponding menu window is assigned, it displays it.
+In this case, by default, the number  ```screen_id() = 0 ```, which corresponds to the main menu, further actions of the player in the menu by pressing the corresponding buttons will change its number and menu windows accordingly.
 
-The logic also stores an **instance** of itself as a **global variable** in the `game_logic` field, to ensure that other modules access the same **instance**.
+The function will be used for rendering:<br />
+       ```self.font.render()```<br />
+set the text, color, and antialias values.<br />
+        ```self.screen.blit()```<br />
+draw the text<br />
+        ```pg.Rect()```<br />
+set the position of the buttons and backgrounds in the menu.<br />
+        ```pg.draw.rect()```<br />
+draw the buttons and backgrounds<br />
+       
+### **Navigate through the menu buttons **
 
-### **Starting a game**
-Use the `start` method to start a new game. This method requires arguments for which **user** is playing, which **game** is to be played and the chosen **difficulty**
-The method then sets the **board**, fetches the correct **username** from the database and instanciates both the **game gui** and the **ai**, sending the necessary information.
+ ```if event.type == pg.MOUSEBUTTONDOWN and event.button == 1: ```
 
-### **Checking which moves are possible**
-The `get_valid_moves` method is used to check which moves are possible based on the rules of the chosen game. It uses the optional arguments of `chosen_piece`, a single variable in the **board** array, and `board_preview`, a hypothetical state of the **board**. When it is the **player_turn**, it returns a copy of the **board**, setting variables which show where the **chosen_piece** can move to and if it lands on an opponent piece. For checkers, it first checks if there are pieces which can jump over an opponents piece and only if this check returns no result will it check which single move the **chosen_piece** can do. It will return nothing if `consecutive_move` is true, however, to prevent the switching of board pieces.
-For the AI, the method returns the `moves`array, checking for all possible **moves** based on the given **board_preview**. Again, for checkers the method first sees whether there are jumping moves available before considering any non jumping moves.
-Before returning the moves to the AI, the `game_is_finished` method gets called with an argument of `valid_ai_moves_empty`as true, if the `moves`array is empty and the AI is out of moves.
+If the user clicks on the button with the left mouse button, the menu will be navigated depending on its function.
 
-### **Changing the turn**
-The `switch_turn` method is to be called after a move has been made. It calls the `game_is_finished` method to see if the game is done, then it changes the variables of the **board** based on the given `move`argument, which is expected to be a tuple of two **board** positions, the first being the one where the moved piece came from, the other where it landed.
-Based on the `player_turn` Bool, it either recursively calls itself again, this time with an argument calling the method which starts the **AI**, which gets a **board_preview** as an argument, or it returns nothing, allowing the Player to make their next move.
-In case checkers is being played, the method also checks whether a `consecutive_move`is being made where a player may move again after beating an opponents piece, in which case it returns a new **board_preview** for the **Game Gui**, only setting the possible moves of the one valid piece, or it recursively calls itself again, this time immediatly giving a `consecutive_moves`argument to the **AI** method, an array of the only valid moves.
-After every turn the **AI** makes, `game_is_finished` gets called.
+## **Database**
+In the file [`database.py`](board_blitz/database.py) a database named '`gamesdb.db`' is created to connect with the `SQLite3` module, two tables follow to store the login information of the registered users and to store the result values after every game finishes.
 
-### **Creating hypothetical board states**
-The method `preview_move` exists to return a hypothetical **board**, called `ai_board`, based on a given `board`, `move` and whether it is a `player_move`or not, to the **AI** while its algorythm checks for the best possible outcome.
+Following, some methods are defined to `add` entries to the database and to `fetch` contents from it, this methods can be called from other classes in the application.
 
-### **Checking for hypothetical player moves**
-The method `player_move_list` returns an array of all possible **moves** the player could make, called `player_moves`, using a given `board`, so that the **AI**s algorythm can make use of them.
+`connection.row_factory = sqlite3.Row` was added to not only read the queried data as tuples, but to also have the corresponding keys for it.
 
-### **Checking if a game has ended**
-The `game_is_finished` method is responsible for checking whether a game has ended or not, if the player has won and sending that information to the **Database**, along with the **user id**, **difficulty** and which **game** was played.
-It accepts the optional arguments of `game_cancelled` and `valid_ai_moves_empty`.
-
-It checks the following possibilities:
-
-    - The player moved a piece to the opponents row, the player has won
-    - The opponent moved a piece to the players row, the player has lost
-    - The player is out of moves, the player has lost
-    - `valid_ai_moves_empty` is true, the AI has no available moves, the player has won
-    - `game_cancelled` is true, the player has forfeit, the player has lost
-
-### **AI**
+## **AI**
 Technical details like how the AI works and what it can and can’t do will be explained in this Technical Documentation.
 
 ### **First Step**
@@ -276,20 +275,20 @@ Overall, this code sets up the basic framework for an AI that will play a specif
 ### **The AI’s best possible move**
 To determine the best possible move, the AI utilizes a `next_move` function. Prior to execution, two variables need to be set: `best_moves` (initialized as an empty list) and `best_moves_value` (initialized as "None"). The AI will then iterate through all possible moves and if it finds a move that is superior to the previous best move, it will replace it with the new move.
 
-## **AI Difficulty with Alpha-beta pruning** 
+### **AI Difficulty with Alpha-beta pruning** 
 First the AI will need the `get_board_value` that calculates the value of a given game board recursively up to a specified depth, using alpha-beta pruning.
 
 The function takes four parameters:
 `board`: a list of lists representing the game board
 `depth`: an integer specifying how deep the recursion should go
 `ai_turn`: a Boolean indicating whether it is the AI's turn to make a move
-`alpha` and "beta": two optional arguments that set the initial alpha and beta values for the alpha-beta pruning algorithm.
+`alpha` and `beta`: two optional arguments that set the initial alpha and beta values for the alpha-beta pruning algorithm.
 The function first initializes a `board_value` variable to 0. It then iterates through all valid moves that can be made on the current board using the `get_valid_moves` function from the `game_logic` module. For each valid move, the function creates a new board by using the `preview_move` function from the `game_logic` module.
 It then evaluates the current board using the `rate_board` function (which assigns a score to the board based on various factors like piece positions and control of the board). The function then updates the `board_value` variable based on whether it is the AI's turn or not, and updates the alpha and beta values accordingly for the alpha-beta pruning algorithm.
 If the beta value is greater than or equal to the alpha value (meaning that the current subtree does not need to be explored further), the function breaks out of the loop. Otherwise, it calls itself recursively with the new board and updates the "board_value" variable again based on whether it is the AI's turn or not.
 The function returns the final "board_value" after all valid moves have been explored up to the specified depth.
 
-## **Rating the board**
+### **Rating the board**
 Firstly, the AI, counts the number of pieces each player has on the board. Then, it calculates how far the furthest pawn of each player is from their own side of the board. Additionally, it checks whether there are any pawns that are alone in a column for each player. Finally, for the Checkers Game it checks whether any pawns have empty diagonal spaces around them.
 Each of these factors is weighted differently in the score calculation.
 The final score is then returned as a single integer value.
